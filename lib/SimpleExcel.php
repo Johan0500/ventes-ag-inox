@@ -5,8 +5,13 @@ class SimpleExcel {
     
     /**
      * Lit un fichier Excel .xlsx
+     * 
+     * @param string $filePath Chemin du fichier Excel
+     * @param int $sheetIndex Index de la feuille (1 = première)
+     * @return array Données de la feuille
+     * @throws Exception Si le fichier ne peut pas être lu
      */
-    public static function readXLSX($filePath, $sheetIndex = 1) {
+    public static function readXLSX(string $filePath, int $sheetIndex = 1): array {
         if (!file_exists($filePath)) {
             throw new Exception("Fichier non trouvé : $filePath");
         }
@@ -21,17 +26,18 @@ class SimpleExcel {
         $sharedStringsPath = 'xl/sharedStrings.xml';
         if ($zip->locateName($sharedStringsPath) !== false) {
             $xml = simplexml_load_string($zip->getFromName($sharedStringsPath));
-            $namespaces = $xml->getNamespaces(true);
-            foreach ($xml->si as $si) {
-                $text = '';
-                if (isset($si->t)) {
-                    $text = (string)$si->t;
-                } elseif (isset($si->r)) {
-                    foreach ($si->r as $r) {
-                        $text .= (string)$r->t;
+            if ($xml !== false) {
+                foreach ($xml->si as $si) {
+                    $text = '';
+                    if (isset($si->t)) {
+                        $text = (string)$si->t;
+                    } elseif (isset($si->r)) {
+                        foreach ($si->r as $r) {
+                            $text .= (string)$r->t;
+                        }
                     }
+                    $sharedStrings[] = $text;
                 }
-                $sharedStrings[] = $text;
             }
         }
         
@@ -43,34 +49,45 @@ class SimpleExcel {
         }
         
         // Lire la feuille de calcul
-        $xml = simplexml_load_string($zip->getFromName($sheetFile));
-        $namespaces = $xml->getNamespaces(true);
+        $xmlContent = $zip->getFromName($sheetFile);
+        if ($xmlContent === false) {
+            $zip->close();
+            throw new Exception("Impossible de lire la feuille $sheetIndex");
+        }
+        
+        $xml = simplexml_load_string($xmlContent);
+        if ($xml === false) {
+            $zip->close();
+            throw new Exception("XML invalide dans la feuille $sheetIndex");
+        }
         
         $data = [];
-        foreach ($xml->sheetData->row as $row) {
-            $rowData = [];
-            $cells = $row->c;
-            
-            foreach ($cells as $cell) {
-                $cellType = (string)$cell['t'];
-                $value = (string)$cell->v;
-                
-                // Convertir les références de chaînes partagées
-                if ($cellType === 's' && isset($sharedStrings[(int)$value])) {
-                    $value = $sharedStrings[(int)$value];
-                }
-                // Convertir les nombres
-                elseif ($cellType === 'n' || $cellType === '') {
-                    if (is_numeric($value)) {
-                        $value = $value + 0; // Convertir en nombre
+        if (isset($xml->sheetData->row)) {
+            foreach ($xml->sheetData->row as $row) {
+                $rowData = [];
+                if (isset($row->c)) {
+                    foreach ($row->c as $cell) {
+                        $cellType = (string)$cell['t'];
+                        $value = (string)$cell->v;
+                        
+                        // Convertir les références de chaînes partagées
+                        if ($cellType === 's' && isset($sharedStrings[(int)$value])) {
+                            $value = $sharedStrings[(int)$value];
+                        }
+                        // Convertir les nombres
+                        elseif ($cellType === 'n' || $cellType === '') {
+                            if (is_numeric($value)) {
+                                $value = $value + 0; // Convertir en nombre
+                            }
+                        }
+                        
+                        $rowData[] = $value;
                     }
                 }
                 
-                $rowData[] = $value;
-            }
-            
-            if (!empty($rowData)) {
-                $data[] = $rowData;
+                if (!empty($rowData)) {
+                    $data[] = $rowData;
+                }
             }
         }
         
@@ -80,23 +97,39 @@ class SimpleExcel {
     
     /**
      * Détecte l'index d'une feuille par son nom
+     * 
+     * @param string $filePath Chemin du fichier Excel
+     * @param string $sheetName Nom de la feuille
+     * @return int Index de la feuille
      */
-    public static function getSheetIndex($filePath, $sheetName) {
+    public static function getSheetIndex(string $filePath, string $sheetName): int {
         $zip = new ZipArchive();
         if ($zip->open($filePath) !== TRUE) {
             throw new Exception("Impossible d'ouvrir le fichier");
         }
         
         // Lire le classeur
-        $workbookXml = simplexml_load_string($zip->getFromName('xl/workbook.xml'));
-        $index = 1;
+        $workbookContent = $zip->getFromName('xl/workbook.xml');
+        if ($workbookContent === false) {
+            $zip->close();
+            return 1;
+        }
         
-        foreach ($workbookXml->sheets->sheet as $sheet) {
-            if ((string)$sheet['name'] === $sheetName) {
-                $zip->close();
-                return $index;
+        $workbookXml = simplexml_load_string($workbookContent);
+        if ($workbookXml === false) {
+            $zip->close();
+            return 1;
+        }
+        
+        $index = 1;
+        if (isset($workbookXml->sheets->sheet)) {
+            foreach ($workbookXml->sheets->sheet as $sheet) {
+                if ((string)$sheet['name'] === $sheetName) {
+                    $zip->close();
+                    return $index;
+                }
+                $index++;
             }
-            $index++;
         }
         
         $zip->close();
