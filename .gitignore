@@ -1,0 +1,13 @@
+# Fichiers sensibles
+config/database.php
+
+# Dossiers et fichiers système
+.DS_Store
+Thumbs.db
+
+# Dépendances
+node_modules/
+vendor/
+
+# Logs
+*.log
