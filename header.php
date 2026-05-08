@@ -2,7 +2,6 @@
 require_once __DIR__ . '/auth.php';
 requireLogin();
 
-// Déterminer la page active
 $currentPage = basename($_SERVER['PHP_SELF']);
 ?>
 <!DOCTYPE html>
@@ -14,331 +13,583 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #1a73e8;
-            --success: #0d904f;
-            --danger: #ea4335;
-            --warning: #f9ab00;
-            --purple: #6f42c1;
+            --primary: #4f46e5;
+            --primary-dark: #3730a3;
+            --primary-light: #818cf8;
+            --success: #10b981;
+            --success-light: #d1fae5;
+            --danger: #ef4444;
+            --danger-light: #fee2e2;
+            --warning: #f59e0b;
+            --warning-light: #fef3c7;
+            --info: #06b6d4;
+            --info-light: #cffafe;
+            --purple: #8b5cf6;
+            --purple-light: #ede9fe;
+            --bg: #f1f5f9;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            --radius-sm: 8px;
+            --radius: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         * { box-sizing: border-box; }
         
         body { 
-            background: #f0f2f5; 
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            margin: 0;
-            padding: 0;
+            background: var(--bg); 
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            color: var(--text);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
         }
         
-        /* Navbar principale */
+        /* ======== NAVBAR ======== */
         .navbar { 
-            background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%) !important; 
-            box-shadow: 0 2px 20px rgba(0,0,0,0.15);
-            padding: 0.5rem 0;
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 30%, #4f46e5 100%) !important;
+            box-shadow: var(--shadow-lg);
+            padding: 0.6rem 0;
+            backdrop-filter: blur(10px);
         }
         
         .navbar-brand { 
-            font-weight: 700; 
+            font-weight: 800; 
             font-size: 1.3rem; 
             letter-spacing: -0.5px;
-            transition: opacity 0.2s;
+            background: linear-gradient(135deg, #ffffff 0%, #c7d2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-        .navbar-brand:hover { opacity: 0.9; }
         
         .nav-link { 
-            color: rgba(255,255,255,0.85) !important; 
+            color: rgba(255,255,255,0.8) !important; 
             font-weight: 500; 
-            padding: 0.5rem 0.8rem !important; 
-            border-radius: 8px; 
-            margin: 0 1px;
-            transition: all 0.2s ease;
-            font-size: 0.9rem;
-            white-space: nowrap;
+            padding: 0.5rem 0.9rem !important; 
+            border-radius: var(--radius);
+            margin: 0 2px;
+            transition: var(--transition);
+            font-size: 0.88rem;
+            position: relative;
         }
         
         .nav-link:hover { 
-            background: rgba(255,255,255,0.15); 
+            background: rgba(255,255,255,0.12); 
             color: white !important;
         }
         
         .nav-link.active { 
-            background: rgba(255,255,255,0.25); 
+            background: rgba(255,255,255,0.2) !important;
             color: white !important;
             font-weight: 600;
-        }
-        
-        .nav-link i {
-            margin-right: 3px;
+            box-shadow: 0 0 20px rgba(255,255,255,0.1);
         }
         
         .dropdown-menu { 
             border: none; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2); 
-            border-radius: 12px; 
+            box-shadow: var(--shadow-xl);
+            border-radius: var(--radius-lg);
             padding: 0.5rem;
-            margin-top: 10px;
+            margin-top: 12px;
+            background: white;
+            animation: dropdownFade 0.2s ease;
+        }
+        
+        @keyframes dropdownFade {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         .dropdown-item {
-            border-radius: 8px;
-            padding: 0.5rem 1rem;
-            font-size: 0.9rem;
-            transition: all 0.2s;
+            border-radius: var(--radius-sm);
+            padding: 0.6rem 1rem;
+            font-size: 0.88rem;
+            transition: var(--transition);
         }
         
         .dropdown-item:hover {
-            background: #f0f4ff;
-            color: #1a73e8;
+            background: #eef2ff;
+            color: var(--primary);
         }
         
-        .dropdown-item i {
-            margin-right: 8px;
-            color: #1a73e8;
-        }
-        
-        /* Badge utilisateur */
         .user-badge {
-            background: rgba(255,255,255,0.2);
-            padding: 0.4rem 0.8rem;
-            border-radius: 20px;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            padding: 0.4rem 1rem;
+            border-radius: 50px;
             color: white;
             font-size: 0.85rem;
             font-weight: 500;
-            white-space: nowrap;
+            border: 1px solid rgba(255,255,255,0.2);
         }
         
         .user-badge a { 
             color: white; 
             text-decoration: none;
-            opacity: 0.8;
-            transition: opacity 0.2s;
+            opacity: 0.7;
+            transition: var(--transition);
         }
         .user-badge a:hover { opacity: 1; }
         
-        /* Cartes */
+        /* ======== CARDS ======== */
         .card { 
-            border: none; 
-            border-radius: 16px; 
-            box-shadow: 0 2px 12px rgba(0,0,0,0.04); 
-            margin-bottom: 1.5rem;
-            background: white;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-sm);
+            background: var(--card);
+            transition: var(--transition);
+            overflow: hidden;
+        }
+        
+        .card:hover { 
+            box-shadow: var(--shadow-md);
         }
         
         .card-header { 
             background: white; 
-            border-bottom: 1px solid #eef0f2; 
+            border-bottom: 1px solid var(--border);
             font-weight: 600; 
-            padding: 1rem 1.5rem;
-            border-radius: 16px 16px 0 0 !important;
+            padding: 1.1rem 1.5rem;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
         
         .card-body {
             padding: 1.5rem;
         }
         
-        /* Chart */
+        /* ======== STAT CARDS ======== */
+        .stat-card {
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition);
+            cursor: pointer;
+            border: none;
+        }
+        
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: -30px;
+            right: -30px;
+            width: 100px;
+            height: 100px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+        }
+        
+        .stat-card:hover::after {
+            width: 120px;
+            height: 120px;
+        }
+        
+        .stat-card .icon-stat {
+            font-size: 2.5rem;
+            opacity: 0.3;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: 800;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .stat-card .label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            opacity: 0.85;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* ======== BUTTONS ======== */
+        .btn {
+            font-weight: 600;
+            padding: 0.6rem 1.3rem;
+            border-radius: var(--radius);
+            transition: var(--transition);
+            letter-spacing: 0.3px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border: none;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.4);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+            border: none;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        }
+        
+        .btn-outline-primary {
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .btn-outline-primary:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .btn-sm {
+            padding: 0.4rem 1rem;
+            font-size: 0.82rem;
+        }
+        
+        .btn-lg {
+            padding: 0.8rem 2rem;
+            font-size: 1rem;
+        }
+        
+        /* ======== TABLES ======== */
+        .table {
+            margin-bottom: 0;
+        }
+        
+        .table th {
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            padding: 1rem 1.2rem;
+            background: #f8fafc;
+            border-bottom: 2px solid var(--border);
+        }
+        
+        .table td {
+            padding: 0.9rem 1.2rem;
+            vertical-align: middle;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .table tbody tr {
+            transition: var(--transition);
+        }
+        
+        .table tbody tr:hover {
+            background: #f8fafc;
+        }
+        
+        /* ======== BADGES ======== */
+        .badge {
+            font-weight: 600;
+            padding: 0.4em 0.8em;
+            border-radius: 50px;
+            letter-spacing: 0.3px;
+        }
+        
+        /* ======== ALERTS ======== */
+        .alert {
+            border: none;
+            border-radius: var(--radius-lg);
+            padding: 1rem 1.3rem;
+            font-weight: 500;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .alert-flash {
+            border-radius: var(--radius);
+            padding: 0.8rem 1.2rem;
+            font-size: 0.88rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+            border-left: 4px solid;
+        }
+        
+        .alert-flash.danger { 
+            background: var(--danger-light); 
+            border-left-color: var(--danger);
+            color: #991b1b;
+        }
+        
+        .alert-flash.success { 
+            background: var(--success-light); 
+            border-left-color: var(--success);
+            color: #065f46;
+        }
+        
+        /* ======== PROGRESS BARS ======== */
+        .progress {
+            background: #e2e8f0;
+            border-radius: 50px;
+            height: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            border-radius: 50px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            transition: width 0.6s ease;
+        }
+        
+        .progress-bar.bg-success {
+            background: linear-gradient(135deg, var(--success) 0%, #34d399 100%);
+        }
+        
+        /* ======== EXECUTIVE SUMMARY ======== */
+        .executive-summary {
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4f46e5 100%);
+            color: white;
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-xl);
+        }
+        
+        .executive-summary::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 400px;
+            height: 400px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 50%;
+        }
+        
+        .executive-summary::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -10%;
+            width: 300px;
+            height: 300px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 50%;
+        }
+        
+        /* ======== CHART CONTAINER ======== */
         .chart-container { 
             position: relative; 
             height: 350px; 
             width: 100%;
         }
         
-        /* Animations */
+        /* ======== TOP LINKS ======== */
+        .top-link {
+            display: flex;
+            align-items: center;
+            padding: 0.7rem 1.2rem;
+            text-decoration: none;
+            color: var(--text);
+            transition: var(--transition);
+            border-bottom: 1px solid var(--border);
+            gap: 10px;
+        }
+        
+        .top-link:last-child { border-bottom: none; }
+        
+        .top-link:hover { 
+            background: #f8fafc;
+            padding-left: 1.5rem;
+        }
+        
+        .top-link .rank { 
+            width: 32px; 
+            font-weight: 700; 
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        
+        .top-link .rank.gold { color: #f59e0b; }
+        .top-link .rank.silver { color: #94a3b8; }
+        .top-link .rank.bronze { color: #d97706; }
+        
+        /* ======== ANIMATIONS ======== */
         @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
         
         .animate-fade {
             animation: fadeInUp 0.5s ease forwards;
         }
         
-        /* Tableau */
-        .table th {
-            font-weight: 600;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: #6c757d;
-            border-top: none;
-        }
+        .animate-fade:nth-child(1) { animation-delay: 0s; }
+        .animate-fade:nth-child(2) { animation-delay: 0.05s; }
+        .animate-fade:nth-child(3) { animation-delay: 0.1s; }
+        .animate-fade:nth-child(4) { animation-delay: 0.15s; }
+        .animate-fade:nth-child(5) { animation-delay: 0.2s; }
+        .animate-fade:nth-child(6) { animation-delay: 0.25s; }
         
-        .table td {
-            vertical-align: middle;
-        }
-        
-        /* Responsive */
+        /* ======== RESPONSIVE ======== */
         @media (max-width: 992px) {
-            .navbar-nav {
-                padding: 0.5rem 0;
-            }
-            .nav-link {
-                padding: 0.5rem 1rem !important;
-                margin: 2px 0;
-            }
-            .user-badge {
-                margin-top: 10px;
-                text-align: center;
-            }
-            .chart-container { 
-                height: 250px; 
-            }
-            .card-body {
-                padding: 1rem;
-            }
+            .navbar-nav { padding: 0.5rem 0; }
+            .nav-link { margin: 3px 0; }
+            .user-badge { margin-top: 10px; }
+            .chart-container { height: 280px; }
         }
         
         @media (max-width: 768px) {
-            .chart-container { 
-                height: 220px; 
-            }
-            .container-fluid {
-                padding-left: 0.5rem !important;
-                padding-right: 0.5rem !important;
-            }
+            .chart-container { height: 230px; }
+            .stat-card .value { font-size: 1.5rem; }
+            .executive-summary { padding: 1.5rem; }
         }
         
-        /* Scrollbar stylisée */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #c1c1c1;
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #a1a1a1;
+        /* ======== SCROLLBAR ======== */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* ======== FORM CONTROLS ======== */
+        .form-control, .form-select {
+            border-radius: var(--radius);
+            border: 2px solid var(--border);
+            padding: 0.6rem 1rem;
+            transition: var(--transition);
+            font-family: 'Inter', sans-serif;
         }
         
-        /* Badge notification */
-        .badge-notif {
-            position: relative;
-            top: -8px;
-            right: -5px;
-            font-size: 0.6rem;
-            padding: 3px 6px;
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+        }
+        
+        /* ======== SELECTION ======== */
+        ::selection {
+            background: var(--primary-light);
+            color: white;
         }
     </style>
 </head>
 <body>
-    <!-- Barre de navigation principale -->
+    <!-- NAVBAR -->
     <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
         <div class="container">
-            <!-- Logo -->
             <a class="navbar-brand" href="index.php">
-                🏥 INOX PHARMA
+                <span style="font-size:1.4rem;">🏥</span> INOX PHARMA
             </a>
             
-            <!-- Bouton hamburger mobile -->
-            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             
-            <!-- Menu -->
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    <!-- Dashboard -->
                     <li class="nav-item">
                         <a class="nav-link <?php echo $currentPage=='index.php'?'active':''; ?>" href="index.php">
-                            <i class="bi bi-speedometer2"></i> Dashboard
+                            <i class="bi bi-speedometer2 me-1"></i> Dashboard
                         </a>
                     </li>
                     
-                    <!-- Menu Produits -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle <?php echo in_array($currentPage,['produits.php','produit_detail.php'])?'active':''; ?>" 
                            href="#" data-bs-toggle="dropdown">
-                            <i class="bi bi-box"></i> Produits
+                            <i class="bi bi-box me-1"></i> Produits
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="produits.php"><i class="bi bi-search"></i> Rechercher un produit</a></li>
-                            <li><a class="dropdown-item" href="produits.php?all=1"><i class="bi bi-list-ul"></i> Tous les produits</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="comparaison.php?mode=produits"><i class="bi bi-bar-chart"></i> Comparer les produits</a></li>
+                            <li><a class="dropdown-item" href="produits.php"><i class="bi bi-search me-2"></i>Rechercher</a></li>
+                            <li><a class="dropdown-item" href="produits.php?all=1"><i class="bi bi-list-ul me-2"></i>Tous les produits</a></li>
                         </ul>
                     </li>
                     
-                    <!-- Menu Clients -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle <?php echo in_array($currentPage,['clients.php','client_detail.php'])?'active':''; ?>" 
                            href="#" data-bs-toggle="dropdown">
-                            <i class="bi bi-shop"></i> Clients
+                            <i class="bi bi-shop me-1"></i> Clients
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="clients.php"><i class="bi bi-search"></i> Rechercher un client</a></li>
-                            <li><a class="dropdown-item" href="clients.php?all=1"><i class="bi bi-list-ul"></i> Tous les clients</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="comparaison.php?mode=clients"><i class="bi bi-bar-chart"></i> Comparer les clients</a></li>
+                            <li><a class="dropdown-item" href="clients.php"><i class="bi bi-search me-2"></i>Rechercher</a></li>
+                            <li><a class="dropdown-item" href="clients.php?all=1"><i class="bi bi-list-ul me-2"></i>Tous les clients</a></li>
                         </ul>
                     </li>
                     
-                    <!-- Ventes par mois -->
                     <li class="nav-item">
                         <a class="nav-link <?php echo $currentPage=='ventes_mois.php'?'active':''; ?>" href="ventes_mois.php">
-                            <i class="bi bi-calendar-check"></i> Ventes/Mois
+                            <i class="bi bi-calendar-check me-1"></i> Ventes/Mois
                         </a>
                     </li>
                     
-                    <!-- Comparaison -->
                     <li class="nav-item">
                         <a class="nav-link <?php echo $currentPage=='comparaison.php'?'active':''; ?>" href="comparaison.php">
-                            <i class="bi bi-bar-chart"></i> Comparaison
+                            <i class="bi bi-bar-chart me-1"></i> Comparaison
                         </a>
                     </li>
                     
-                    <!-- Régions -->
                     <li class="nav-item">
                         <a class="nav-link <?php echo $currentPage=='regions.php'?'active':''; ?>" href="regions.php">
-                            <i class="bi bi-map"></i> Régions
+                            <i class="bi bi-map me-1"></i> Régions
                         </a>
                     </li>
                     
-                    <!-- Prévisions -->
                     <li class="nav-item">
                         <a class="nav-link <?php echo $currentPage=='previsions.php'?'active':''; ?>" href="previsions.php">
-                            <i class="bi bi-graph-up-arrow"></i> Prévisions
+                            <i class="bi bi-graph-up-arrow me-1"></i> Prévisions
                         </a>
                     </li>
                     
-                    <!-- Menu Import/Export -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle <?php echo in_array($currentPage,['export.php','ajout_mois.php','import/import.php'])?'active':''; ?>" 
                            href="#" data-bs-toggle="dropdown">
-                            <i class="bi bi-folder-symlink"></i> Données
+                            <i class="bi bi-folder-symlink me-1"></i> Données
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="ajout_mois.php"><i class="bi bi-plus-circle"></i> Ajouter un mois</a></li>
-                            <li><a class="dropdown-item" href="import/import.php"><i class="bi bi-upload"></i> Importer Excel</a></li>
+                            <li><a class="dropdown-item" href="ajout_mois.php"><i class="bi bi-plus-circle me-2"></i>Ajouter un mois</a></li>
+                            <li><a class="dropdown-item" href="import/import.php"><i class="bi bi-upload me-2"></i>Importer Excel</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="export.php"><i class="bi bi-file-earmark-excel"></i> Export Excel</a></li>
-                            <li><a class="dropdown-item" href="export.php?format=excel&type=agences"><i class="bi bi-building"></i> Export Agences</a></li>
+                            <li><a class="dropdown-item" href="export.php"><i class="bi bi-file-earmark-excel me-2"></i>Export Excel</a></li>
                         </ul>
                     </li>
                 </ul>
                 
-                <!-- Badge utilisateur connecté -->
-                <div class="user-badge d-flex align-items-center">
-                    <span>👤 <?php echo htmlspecialchars($_SESSION['nom'] ?? $_SESSION['username']); ?></span>
-                    <a href="logout.php" class="ms-2" title="Déconnexion" data-bs-toggle="tooltip">
-                        🚪
-                    </a>
+                <div class="user-badge">
+                    👤 <?php echo htmlspecialchars($_SESSION['nom'] ?? $_SESSION['username']); ?>
+                    <a href="logout.php" class="ms-2" title="Déconnexion">🚪</a>
                 </div>
             </div>
         </div>
     </nav>
     
-    <!-- Contenu principal -->
     <div class="container-fluid px-4 mt-4">

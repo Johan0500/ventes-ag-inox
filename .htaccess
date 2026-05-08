@@ -1,2 +1,16 @@
-php_flag display_errors on
-php_value error_reporting E_ALL
+# Empêcher le listage des répertoires
+Options -Indexes
+
+# Protéger les fichiers sensibles
+<FilesMatch "\.(sql|md|log)$">
+    Deny from all
+</FilesMatch>
+
+# Rediriger les erreurs
+ErrorDocument 403 /inox-pharma-ventes/403.php
+ErrorDocument 404 /inox-pharma-ventes/404.php
+
+# Sécurité des sessions
+php_flag session.cookie_httponly on
+php_flag session.cookie_secure off
+php_value session.gc_maxlifetime 1800
