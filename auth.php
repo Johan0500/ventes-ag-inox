@@ -1,21 +1,14 @@
 <?php
-// Démarrer la session seulement si elle n'est pas déjà active
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
 require_once __DIR__ . '/config/database.php';
 
-/**
- * Vérifie si l'utilisateur est connecté
- */
 function isLoggedIn(): bool {
     return isset($_SESSION['user_id']) && !empty($_SESSION['user_id']);
 }
 
-/**
- * Redirige vers la page de connexion si non connecté
- */
 function requireLogin(): void {
     if (!isLoggedIn()) {
         $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
@@ -24,7 +17,7 @@ function requireLogin(): void {
     }
     
     global $pdo;
-    $stmt = $pdo->prepare("SELECT id FROM utilisateurs WHERE id = ?");
+    $stmt = $pdo->prepare("SELECT id FROM utilisateurs WHERE id = ? AND active = 1");
     $stmt->execute([$_SESSION['user_id']]);
     if (!$stmt->fetch()) {
         session_destroy();
@@ -40,16 +33,29 @@ function requireLogin(): void {
     }
 }
 
-/**
- * Vérifie si l'utilisateur est admin
- */
 function isAdmin(): bool {
     return isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
 }
 
+function isSuperAdmin(): bool {
+    return isset($_SESSION['labo']) && $_SESSION['labo'] === 'admin';
+}
+
+function getCurrentLabo(): string {
+    return $_SESSION['labo'] ?? '';
+}
+
 /**
- * Connexion utilisateur
+ * Retourne la clause SQL pour filtrer par labo
  */
+function getLaboFilter(): string {
+    $labo = getCurrentLabo();
+    if ($labo === 'admin' || empty($labo)) {
+        return '';
+    }
+    return $labo;
+}
+
 function login(string $username, string $password): bool {
     global $pdo;
     
@@ -75,6 +81,7 @@ function login(string $username, string $password): bool {
         $_SESSION['username'] = $user['username'];
         $_SESSION['nom'] = $user['nom'];
         $_SESSION['role'] = $user['role'];
+        $_SESSION['labo'] = $user['labo'];
         $_SESSION['last_activity'] = time();
         $_SESSION['ip_address'] = $_SERVER['REMOTE_ADDR'];
         $_SESSION['user_agent'] = $_SERVER['HTTP_USER_AGENT'];
@@ -92,9 +99,6 @@ function login(string $username, string $password): bool {
     return false;
 }
 
-/**
- * Déconnexion
- */
 function logout(): void {
     $_SESSION = [];
     
@@ -111,12 +115,9 @@ function logout(): void {
     exit;
 }
 
-/**
- * Valider la session
- */
 function validateSession(): void {
     if (isLoggedIn()) {
-        if ($_SESSION['user_agent'] !== $_SERVER['HTTP_USER_AGENT']) {
+        if (isset($_SESSION['user_agent']) && $_SESSION['user_agent'] !== $_SERVER['HTTP_USER_AGENT']) {
             logout();
         }
         
@@ -127,6 +128,5 @@ function validateSession(): void {
     }
 }
 
-// Valider la session automatiquement
 validateSession();
 ?>

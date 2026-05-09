@@ -1,128 +1,82 @@
 <?php
+$pageTitle = "Import Ventes";
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 require_once '../config/database.php';
 require_once '../lib/SimpleExcel.php';
+require_once '../auth.php';
+requireLogin();
 
-echo "<!DOCTYPE html>
-<html lang='fr'>
-<head>
-    <meta charset='UTF-8'>
-    <title>Import - Inox Pharma</title>
-    <link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css' rel='stylesheet'>
-    <style>
-        body { background: #f5f7fa; }
-        .card { border: none; border-radius: 15px; box-shadow: 0 2px 15px rgba(0,0,0,0.05); margin-bottom: 1.5rem; }
-    </style>
-</head>
-<body>
-<div class='container mt-4'>";
-
-echo "<h1>📥 Importation des données</h1>";
-
-// Récupérer les statistiques actuelles
-try {
-    $nbP = $pdo->query("SELECT COUNT(*) FROM produits")->fetchColumn();
-    $nbC = $pdo->query("SELECT COUNT(*) FROM clients")->fetchColumn();
-    $nbV = $pdo->query("SELECT COUNT(*) FROM ventes_eclatees")->fetchColumn();
-    $moisDispo = $pdo->query("SELECT DISTINCT DATE_FORMAT(mois, '%Y-%m') as m FROM ventes_eclatees ORDER BY m DESC")->fetchAll(PDO::FETCH_COLUMN);
-    $dernierImport = $pdo->query("SELECT MAX(created_at) FROM ventes_eclatees")->fetchColumn();
-} catch(Exception $e) {
-    $nbP = $nbC = $nbV = 0;
-    $moisDispo = [];
-    $dernierImport = '';
+if (!isAdmin() && !isSuperAdmin()) {
+    header('Location: ../403.php');
+    exit;
 }
 
+// Statistiques actuelles
+$nbP = $pdo->query("SELECT COUNT(*) FROM produits")->fetchColumn();
+$nbC = $pdo->query("SELECT COUNT(*) FROM clients")->fetchColumn();
+$nbV = $pdo->query("SELECT COUNT(*) FROM ventes_eclatees")->fetchColumn();
+$moisDispo = $pdo->query("SELECT DISTINCT DATE_FORMAT(mois, '%Y-%m') as m FROM ventes_eclatees ORDER BY m DESC")->fetchAll(PDO::FETCH_COLUMN);
+$nbAssoc = $pdo->query("SELECT COUNT(*) FROM grossiste_clients")->fetchColumn();
+$nbProvinces = $pdo->query("SELECT COUNT(*) FROM provinces")->fetchColumn();
+
+$message = '';
+$type = '';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['excel_file'])) {
-    
     $uploadFile = __DIR__ . '/../data/temp_import.xlsx';
     $viderTables = isset($_POST['vider_tables']);
     $anneeImport = intval($_POST['annee'] ?? 2026);
-    
-    echo "<div class='card'><div class='card-body'>";
+    $laboForce = $_POST['labo'] ?? 'auto';
+    $grossisteForce = $_POST['grossiste'] ?? 'auto';
     
     if (move_uploaded_file($_FILES['excel_file']['tmp_name'], $uploadFile)) {
-        echo "<div class='alert alert-success'>✅ Fichier uploadé : " . htmlspecialchars($_FILES['excel_file']['name']) . "</div>";
-        
         try {
             $data = SimpleExcel::readXLSX($uploadFile, 2);
-            echo "<div class='alert alert-info'>📊 " . count($data) . " lignes lues</div>";
             
-            // Détecter les colonnes de mois depuis les en-têtes (ligne 3)
+            // Détection des mois
+            $moisMap = ['janvier'=>'01','fevrier'=>'02','février'=>'02','mars'=>'03','avril'=>'04','mai'=>'05','juin'=>'06','juillet'=>'07','aout'=>'08','août'=>'08','septembre'=>'09','octobre'=>'10','novembre'=>'11','decembre'=>'12','décembre'=>'12'];
             $colonnesMois = [];
+            
             if (count($data) >= 3) {
-                $ligne3 = $data[2]; // Index 2 = 3ème ligne
-                
-                // Parcourir les colonnes pour trouver les en-têtes de mois
-                for ($col = 12; $col < count($ligne3); $col += 2) {
-                    $entete = trim((string)($ligne3[$col] ?? ''));
-                    if (!empty($entete) && stripos($entete, 'Qte') !== false) {
-                        // Le nom du mois est dans la ligne 2 (index 1)
-                        $nomMois = trim((string)($data[1][$col] ?? $data[1][$col-1] ?? ''));
-                        $colonnesMois[] = [
-                            'colonne' => $col,
-                            'nom' => $nomMois
-                        ];
+                $ligne2 = $data[1] ?? [];
+                for ($col = 12; $col < min(count($ligne2), 24); $col += 2) {
+                    $nomMois = strtolower(trim((string)($ligne2[$col] ?? '')));
+                    if (!empty($nomMois) && isset($moisMap[$nomMois])) {
+                        $colonnesMois[] = ['colonne' => $col, 'date' => "$anneeImport-{$moisMap[$nomMois]}-01", 'nom' => ucfirst($nomMois)];
                     }
                 }
             }
             
-            // Si pas de colonnes détectées, utiliser les colonnes par défaut
             if (empty($colonnesMois)) {
                 $colonnesMois = [
-                    ['colonne' => 12, 'nom' => 'Février'],
-                    ['colonne' => 14, 'nom' => 'Mars'],
-                    ['colonne' => 16, 'nom' => 'Avril']
+                    ['colonne'=>12, 'date'=>"$anneeImport-02-01", 'nom'=>'Février'],
+                    ['colonne'=>14, 'date'=>"$anneeImport-03-01", 'nom'=>'Mars'],
+                    ['colonne'=>16, 'date'=>"$anneeImport-04-01", 'nom'=>'Avril']
                 ];
             }
             
-            // Convertir les noms de mois en dates
-            $moisDates = [];
-            $moisMap = [
-                'janvier' => '01', 'février' => '02', 'fevrier' => '02',
-                'mars' => '03', 'avril' => '04', 'mai' => '05',
-                'juin' => '06', 'juillet' => '07', 'août' => '08', 'aout' => '08',
-                'septembre' => '09', 'octobre' => '10',
-                'novembre' => '11', 'décembre' => '12', 'decembre' => '12'
-            ];
-            
-            foreach ($colonnesMois as $cm) {
-                $nomLower = strtolower($cm['nom']);
-                $numMois = $moisMap[$nomLower] ?? null;
-                if ($numMois) {
-                    $moisDates[$cm['colonne']] = "$anneeImport-$numMois-01";
-                }
-            }
-            
-            echo "<div class='alert alert-info'>📅 Mois détectés : " . implode(', ', array_map(function($d) { 
-                return date('F Y', strtotime($d)); 
-            }, array_values($moisDates))) . " (Année : $anneeImport)</div>";
-            
-            // Option vider ou ajouter
+            // Vider si demandé
             if ($viderTables) {
-                $pdo->exec("SET FOREIGN_KEY_CHECKS = 0");
+                $pdo->exec("SET FOREIGN_KEY_CHECKS=0");
                 $pdo->exec("TRUNCATE TABLE ventes_eclatees");
                 $pdo->exec("TRUNCATE TABLE produits");
                 $pdo->exec("TRUNCATE TABLE clients");
-                $pdo->exec("SET FOREIGN_KEY_CHECKS = 1");
-                echo "<div class='alert alert-warning'>🗑️ Tables vidées avant import</div>";
-            } else {
-                echo "<div class='alert alert-info'>📌 Ajout aux données existantes</div>";
+                $pdo->exec("SET FOREIGN_KEY_CHECKS=1");
             }
             
             $pdo->beginTransaction();
             
-            $nbProduits = 0;
-            $nbClients = 0;
-            $nbVentes = 0;
-            $produits = [];
-            $clients = [];
+            $nbProduits = $nbClients = $nbVentes = 0;
+            $stats = ['croient'=>0, 'licpharma'=>0, 'copharmed'=>0, 'dpci'=>0, 'laborex'=>0, 'tedis'=>0, 'inconnu'=>0];
+            $produits = $clients = [];
             
             for ($i = 3; $i < count($data); $i++) {
                 $row = $data[$i];
                 if (count($row) < 12) continue;
                 
+                $nomFournisseur = trim((string)($row[1] ?? ''));
                 $codeClient = trim((string)($row[4] ?? ''));
                 $designationClient = trim((string)($row[5] ?? ''));
                 $codeCip = trim((string)($row[6] ?? ''));
@@ -132,38 +86,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['excel_file'])) {
                 $province = trim((string)($row[10] ?? ''));
                 $agence = trim((string)($row[11] ?? ''));
                 
-                if (empty($codeCip) && empty($codeClient)) continue;
                 if (empty($codeCip) || empty($codeClient)) continue;
                 
-                // Produit
+                // DÉTECTION LABO
+                $labo = '';
+                if ($laboForce !== 'auto') {
+                    $labo = $laboForce;
+                } else {
+                    $nomUpper = strtoupper($nomFournisseur);
+                    if (strpos($nomUpper, 'CROIENT') !== false) $labo = 'croient';
+                    elseif (strpos($nomUpper, 'MEDISURE') !== false || strpos($nomUpper, 'LIC') !== false) $labo = 'licpharma';
+                }
+                
+                // DÉTECTION GROSSISTE
+                $grossisteCode = '';
+                if ($grossisteForce !== 'auto') {
+                    $grossisteCode = $grossisteForce;
+                } else {
+                    // Chercher dans la table grossiste_clients
+                    $stmt = $pdo->prepare("SELECT grossiste_code FROM grossiste_clients WHERE client_nom LIKE ? OR client_nom LIKE ? LIMIT 1");
+                    $search1 = '%' . $designationClient . '%';
+                    $search2 = '%' . substr($designationClient, 0, 15) . '%';
+                    $stmt->execute([$search1, $search2]);
+                    $result = $stmt->fetch();
+                    if ($result) $grossisteCode = $result['grossiste_code'];
+                }
+                
+                // Stats
+                $stats[$labo ?: 'inconnu']++;
+                $stats[$grossisteCode ?: 'inconnu']++;
+                
+                // INSERT PRODUIT
                 if (!isset($produits[$codeCip])) {
-                    $sql = "INSERT INTO produits (code_cip, libelle, prix_cession, prix_public) 
-                            VALUES (:c, :l, :pc, :pp) ON DUPLICATE KEY UPDATE libelle=VALUES(libelle)";
-                    $stmt = $pdo->prepare($sql);
-                    $stmt->execute(['c'=>$codeCip, 'l'=>$libelle, 'pc'=>$prixCession, 'pp'=>$prixPublic]);
-                    $produits[$codeCip] = true;
-                    $nbProduits++;
+                    $pdo->prepare("INSERT INTO produits (code_cip, labo, libelle, prix_cession, prix_public) VALUES (?,?,?,?,?) ON DUPLICATE KEY UPDATE libelle=VALUES(libelle), labo=VALUES(labo)")->execute([$codeCip, $labo, $libelle, $prixCession, $prixPublic]);
+                    $produits[$codeCip] = true; $nbProduits++;
                 }
                 
-                // Client
+                // INSERT CLIENT
                 if (!isset($clients[$codeClient])) {
-                    $sql = "INSERT INTO clients (code_client, designation, province, agence) 
-                            VALUES (:c, :d, :p, :a) ON DUPLICATE KEY UPDATE designation=VALUES(designation)";
-                    $stmt = $pdo->prepare($sql);
-                    $stmt->execute(['c'=>$codeClient, 'd'=>$designationClient, 'p'=>$province, 'a'=>$agence]);
-                    $clients[$codeClient] = true;
-                    $nbClients++;
+                    $pdo->prepare("INSERT INTO clients (code_client, labo, grossiste_code, designation, province, agence) VALUES (?,?,?,?,?,?) ON DUPLICATE KEY UPDATE designation=VALUES(designation), grossiste_code=VALUES(grossiste_code), labo=VALUES(labo)")->execute([$codeClient, $labo, $grossisteCode, $designationClient, $province, $agence]);
+                    $clients[$codeClient] = true; $nbClients++;
                 }
                 
-                // Ventes pour chaque mois détecté
-                foreach ($moisDates as $colonne => $dateMois) {
-                    $qte = intval($row[$colonne] ?? 0);
+                // INSERT VENTES
+                foreach ($colonnesMois as $cm) {
+                    $qte = intval($row[$cm['colonne']] ?? 0);
                     if ($qte > 0) {
-                        $sql = "INSERT INTO ventes_eclatees (code_cip, code_client, mois, qte_livree) 
-                                VALUES (:cip, :cli, :m, :q)
-                                ON DUPLICATE KEY UPDATE qte_livree = qte_livree + VALUES(qte_livree)";
-                        $stmt = $pdo->prepare($sql);
-                        $stmt->execute(['cip'=>$codeCip, 'cli'=>$codeClient, 'm'=>$dateMois, 'q'=>$qte]);
+                        $pdo->prepare("INSERT INTO ventes_eclatees (code_cip, code_client, labo, grossiste_code, mois, qte_livree) VALUES (?,?,?,?,?,?) ON DUPLICATE KEY UPDATE qte_livree=qte_livree+VALUES(qte_livree)")->execute([$codeCip, $codeClient, $labo, $grossisteCode, $cm['date'], $qte]);
                         $nbVentes++;
                     }
                 }
@@ -171,129 +140,139 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['excel_file'])) {
             
             $pdo->commit();
             
-            echo "<div class='alert alert-success'>
-                <h4>✅ Importation réussie !</h4>
-                <ul>
-                    <li>📦 Nouveaux produits : <strong>$nbProduits</strong></li>
-                    <li>🏪 Nouveaux clients : <strong>$nbClients</strong></li>
-                    <li>💰 Ventes enregistrées : <strong>$nbVentes</strong></li>
-                </ul>
-            </div>";
+            $moisTrouves = array_map(function($c){return $c['nom'].' '.date('Y',strtotime($c['date']));}, $colonnesMois);
+            $message = "✅ Import réussi !<br>📦 $nbProduits produits | 🏪 $nbClients clients | 💰 $nbVentes ventes<br>📅 Mois : " . implode(', ', $moisTrouves) . "<br>🔬 Croient: {$stats['croient']} | 💊 LIC: {$stats['licpharma']} | 🏢 TEDIS: {$stats['tedis']} | DPCI: {$stats['dpci']} | LABOREX: {$stats['laborex']} | COPHARMED: {$stats['copharmed']}";
+            $type = 'success';
             
         } catch (Exception $e) {
             $pdo->rollBack();
-            echo "<div class='alert alert-danger'>❌ Erreur : " . $e->getMessage() . "</div>";
+            $message = "❌ Erreur : " . $e->getMessage();
+            $type = 'danger';
         }
-        
         @unlink($uploadFile);
     }
-    echo "</div></div>";
 }
+
+// Liste des grossistes pour le formulaire
+$grossistesList = $pdo->query("SELECT code, nom FROM grossistes WHERE actif=1")->fetchAll();
 ?>
 
-<!-- Statistiques actuelles -->
-<div class="card">
-    <div class="card-header bg-primary text-white"><h5>📊 Base de données actuelle</h5></div>
-    <div class="card-body">
-        <div class="row text-center">
-            <div class="col-md-3">
-                <div class="border rounded p-3">
-                    <h2 class="text-primary"><?php echo $nbP; ?></h2>
-                    <p class="mb-0">Produits</p>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="border rounded p-3">
-                    <h2 class="text-success"><?php echo $nbC; ?></h2>
-                    <p class="mb-0">Clients</p>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="border rounded p-3">
-                    <h2 class="text-info"><?php echo $nbV; ?></h2>
-                    <p class="mb-0">Transactions</p>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="border rounded p-3">
-                    <h2 class="text-warning"><?php echo count($moisDispo); ?></h2>
-                    <p class="mb-0">Mois de données</p>
-                </div>
-            </div>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Import Ventes - Inox Pharma</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background:#f1f5f9; font-family:'Inter','Segoe UI',sans-serif; }
+        .container { max-width:1000px; }
+        .card { border-radius:16px; box-shadow:0 2px 12px rgba(0,0,0,0.05); border:1px solid #e2e8f0; margin-bottom:1.5rem; }
+        .card-header { background:white; border-bottom:1px solid #e2e8f0; font-weight:600; padding:1rem 1.5rem; border-radius:16px 16px 0 0!important; }
+        .card-body { padding:1.5rem; }
+        .btn { font-weight:600; border-radius:10px; padding:0.5rem 1.3rem; transition:all 0.2s; }
+        .btn-primary { background:linear-gradient(135deg,#4f46e5,#3730a3); border:none; color:white; }
+        .btn-success { background:linear-gradient(135deg,#10b981,#059669); border:none; color:white; }
+        .btn-outline-primary { border:2px solid #4f46e5; color:#4f46e5; }
+        .btn:hover { transform:translateY(-2px); }
+        .form-control, .form-select { border-radius:8px; border:2px solid #e2e8f0; padding:0.55rem 0.9rem; }
+        .upload-zone { border:3px dashed #cbd5e1; border-radius:16px; padding:2rem; text-align:center; cursor:pointer; transition:all 0.3s; background:#f8fafc; }
+        .upload-zone:hover { border-color:#4f46e5; background:#eef2ff; }
+        .stat-mini { background:white; border:1px solid #e2e8f0; border-radius:12px; padding:0.8rem; text-align:center; }
+        .stat-mini .number { font-size:1.5rem; font-weight:700; }
+        .navbar { background:linear-gradient(135deg,#1e1b4b,#4f46e5)!important; padding:0.5rem 0; }
+        .navbar-brand { font-weight:800; color:white!important; text-decoration:none; }
+        .nav-link { color:rgba(255,255,255,0.85)!important; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="../index.php">🏥 INOX PHARMA</a>
+            <div><a href="../index.php" class="nav-link d-inline-block">← Dashboard</a></div>
         </div>
-        <?php if (!empty($moisDispo)): ?>
-        <div class="mt-3 text-center">
-            <span class="badge bg-secondary me-2">Données disponibles :</span>
-            <?php foreach ($moisDispo as $m): ?>
-            <span class="badge bg-info me-1"><?php echo $m; ?></span>
-            <?php endforeach; ?>
-        </div>
-        <?php endif; ?>
-        <?php if ($dernierImport): ?>
-        <div class="mt-2 text-center text-muted small">
-            Dernier import : <?php echo date('d/m/Y H:i', strtotime($dernierImport)); ?>
-        </div>
-        <?php endif; ?>
-    </div>
-</div>
+    </nav>
 
-<!-- Formulaire d'importation -->
-<div class='card mt-4'>
-    <div class='card-header bg-success text-white'><h5>📥 Importer un nouveau fichier Excel</h5></div>
-    <div class='card-body'>
-        <form method='POST' enctype='multipart/form-data'>
-            <div class='mb-3'>
-                <label class='form-label fw-bold'>Fichier Excel (.xlsx)</label>
-                <input type='file' name='excel_file' class='form-control' accept='.xlsx' required>
-                <small class='text-muted'>Le fichier doit contenir une feuille "éclatée"</small>
-            </div>
-            
-            <div class='row mb-3'>
-                <div class='col-md-4'>
-                    <label class='form-label'>Année des données</label>
-                    <select name='annee' class='form-select'>
-                        <?php for ($a = 2024; $a <= 2030; $a++): ?>
-                        <option value='<?php echo $a; ?>' <?php echo $a == 2026 ? 'selected' : ''; ?>>
-                            <?php echo $a; ?>
-                        </option>
-                        <?php endfor; ?>
-                    </select>
-                </div>
-                <div class='col-md-8'>
-                    <label class='form-label'>&nbsp;</label>
-                    <div class='form-check mt-2'>
-                        <input type='checkbox' class='form-check-input' id='vider_tables' name='vider_tables'>
-                        <label class='form-check-label' for='vider_tables'>
-                            ⚠️ <strong>Vider les tables</strong> avant importation 
-                            <small class='text-danger'>(décochez pour ajouter sans effacer)</small>
-                        </label>
+    <div class="container mt-4">
+        <h3>📥 Importation des ventes</h3>
+        
+        <?php if ($message): ?>
+        <div class="alert alert-<?php echo $type; ?>"><?php echo $message; ?></div>
+        <?php endif; ?>
+        
+        <!-- Stats -->
+        <div class="row g-2 mb-4">
+            <div class="col-3"><div class="stat-mini"><div class="number text-primary"><?php echo $nbP; ?></div><small>Produits</small></div></div>
+            <div class="col-3"><div class="stat-mini"><div class="number text-success"><?php echo $nbC; ?></div><small>Clients</small></div></div>
+            <div class="col-3"><div class="stat-mini"><div class="number text-info"><?php echo $nbV; ?></div><small>Ventes</small></div></div>
+            <div class="col-3"><div class="stat-mini"><div class="number text-warning"><?php echo $nbAssoc; ?></div><small>Assoc. grossistes</small></div></div>
+        </div>
+        
+        <!-- Formulaire -->
+        <div class="card">
+            <div class="card-header">📤 Importer un fichier Excel</div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="upload-zone mb-4" onclick="document.getElementById('fileInput').click()">
+                        <div style="font-size:3rem;">📁</div>
+                        <h5>Cliquez ou glissez-déposez</h5>
+                        <p class="text-muted">Fichier Excel (.xlsx) - Feuille "éclatée"</p>
+                        <input type="file" name="excel_file" id="fileInput" class="d-none" accept=".xlsx" required>
+                        <span id="fileName" class="badge bg-primary mt-2" style="display:none;"></span>
                     </div>
-                </div>
+                    
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">📅 Année</label>
+                            <select name="annee" class="form-select">
+                                <?php for($a=2024;$a<=2030;$a++): ?>
+                                <option value="<?php echo $a; ?>" <?php echo $a==2026?'selected':''; ?>><?php echo $a; ?></option>
+                                <?php endfor; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">🔬 Labo</label>
+                            <select name="labo" class="form-select">
+                                <option value="auto">🤖 Auto</option>
+                                <option value="croient">🔬 Croient</option>
+                                <option value="licpharma">💊 LIC Pharma</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">🏢 Grossiste</label>
+                            <select name="grossiste" class="form-select">
+                                <option value="auto">🤖 Auto (via sectorisation)</option>
+                                <?php foreach($grossistesList as $g): ?>
+                                <option value="<?php echo $g['code']; ?>"><?php echo $g['nom']; ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">&nbsp;</label>
+                            <div class="form-check mt-2">
+                                <input type="checkbox" name="vider_tables" class="form-check-input" id="vider">
+                                <label for="vider" class="form-check-label text-danger fw-bold">⚠️ Vider tables</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-success btn-lg">🚀 Importer</button>
+                    <?php if ($nbAssoc == 0): ?>
+                    <div class="alert alert-warning mt-3 mb-0">
+                        ⚠️ <strong>Aucune sectorisation importée !</strong> 
+                        <a href="sectorisation.php">Importez d'abord le fichier des provinces/grossistes</a> 
+                        pour activer la détection automatique.
+                    </div>
+                    <?php endif; ?>
+                </form>
             </div>
-            
-            <button type='submit' class='btn btn-success btn-lg'>
-                <i class='bi bi-upload'></i> 🚀 Importer les données
-            </button>
-            
-            <a href='../index.php' class='btn btn-outline-primary btn-lg ms-2'>
-                📊 Voir le tableau de bord
-            </a>
-        </form>
+        </div>
     </div>
-</div>
-
-<!-- Instructions -->
-<div class='card mt-4'>
-    <div class='card-header bg-info text-white'><h5>📖 Guide d'importation</h5></div>
-    <div class='card-body'>
-        <ul>
-            <li><strong>Premier import :</strong> Cochez "Vider les tables" pour repartir de zéro</li>
-            <li><strong>Ajout de données :</strong> Décochez "Vider les tables" pour ajouter sans effacer</li>
-            <li><strong>Doublons :</strong> Les quantités s'additionnent automatiquement pour les mêmes produit/client/mois</li>
-            <li><strong>Année :</strong> Sélectionnez l'année correspondant aux données du fichier</li>
-            <li><strong>Détection :</strong> Les mois sont détectés automatiquement depuis les en-têtes du fichier</li>
-        </ul>
-    </div>
-</div>
-
-</div></body></html>";
+    
+    <script>
+        document.getElementById('fileInput').addEventListener('change',function(){
+            const s=document.getElementById('fileName');
+            if(this.files[0]){s.textContent='📄 '+this.files[0].name;s.style.display='inline-block';}
+        });
+    </script>
+</body>
+</html>
