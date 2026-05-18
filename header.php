@@ -42,6 +42,8 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         @keyframes dropdownFade { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
         .dropdown-item { border-radius: var(--radius-sm); padding: 0.5rem 0.9rem; font-size: 0.85rem; transition: var(--transition); }
         .dropdown-item:hover { background: #eef2ff; color: var(--primary); }
+        .dropdown-header { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: #ef4444; font-weight: 700; padding: 0.5rem 0.9rem; }
+        .dropdown-divider { border-color: #e2e8f0; }
         .user-badge { background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 0.35rem 0.8rem; border-radius: 50px; color: white; font-size: 0.82rem; font-weight: 500; border: 1px solid rgba(255,255,255,0.2); white-space: nowrap; }
         .user-badge a { color: white; text-decoration: none; opacity: 0.7; transition: var(--transition); }
         .user-badge a:hover { opacity: 1; }
@@ -88,36 +90,90 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    <li class="nav-item"><a class="nav-link <?php echo $currentPage=='index.php'?'active':''; ?>" href="index.php"><i class="bi bi-speedometer2 me-1"></i>Dashboard</a></li>
+                    <!-- Dashboard -->
+                    <li class="nav-item">
+                        <a class="nav-link <?php echo $currentPage=='index.php'?'active':''; ?>" href="index.php">
+                            <i class="bi bi-speedometer2 me-1"></i>Dashboard
+                        </a>
+                    </li>
                     
+                    <!-- Produits -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle <?php echo in_array($currentPage,['produits.php','produit_detail.php'])?'active':''; ?>" href="#" data-bs-toggle="dropdown"><i class="bi bi-box me-1"></i>Produits</a>
+                        <a class="nav-link dropdown-toggle <?php echo in_array($currentPage,['produits.php','produit_detail.php'])?'active':''; ?>" href="#" data-bs-toggle="dropdown">
+                            <i class="bi bi-box me-1"></i>Produits
+                        </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="produits.php"><i class="bi bi-search me-2"></i>Rechercher</a></li>
                             <li><a class="dropdown-item" href="produits.php?all=1"><i class="bi bi-list-ul me-2"></i>Tous les produits</a></li>
                         </ul>
                     </li>
                     
+                    <!-- Clients -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle <?php echo in_array($currentPage,['clients.php','client_detail.php'])?'active':''; ?>" href="#" data-bs-toggle="dropdown"><i class="bi bi-shop me-1"></i>Clients</a>
+                        <a class="nav-link dropdown-toggle <?php echo in_array($currentPage,['clients.php','client_detail.php'])?'active':''; ?>" href="#" data-bs-toggle="dropdown">
+                            <i class="bi bi-shop me-1"></i>Clients
+                        </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="clients.php"><i class="bi bi-search me-2"></i>Rechercher</a></li>
                             <li><a class="dropdown-item" href="clients.php?all=1"><i class="bi bi-list-ul me-2"></i>Tous les clients</a></li>
                         </ul>
                     </li>
                     
-                    <li class="nav-item"><a class="nav-link <?php echo $currentPage=='ventes_mois.php'?'active':''; ?>" href="ventes_mois.php"><i class="bi bi-calendar-check me-1"></i>Ventes/Mois</a></li>
-                    <li class="nav-item"><a class="nav-link <?php echo $currentPage=='ventes_province.php'?'active':''; ?>" href="ventes_province.php"><i class="bi bi-geo-alt me-1"></i>Par Province</a></li>
-                    <li class="nav-item"><a class="nav-link <?php echo $currentPage=='comparaison.php'?'active':''; ?>" href="comparaison.php"><i class="bi bi-bar-chart me-1"></i>Comparaison</a></li>
-                    <li class="nav-item"><a class="nav-link <?php echo $currentPage=='regions.php'?'active':''; ?>" href="regions.php"><i class="bi bi-map me-1"></i>Régions</a></li>
-                    <li class="nav-item"><a class="nav-link <?php echo $currentPage=='previsions.php'?'active':''; ?>" href="previsions.php"><i class="bi bi-graph-up-arrow me-1"></i>Prévisions</a></li>
+                    <!-- Ventes par mois -->
+                    <li class="nav-item">
+                        <a class="nav-link <?php echo $currentPage=='ventes_mois.php'?'active':''; ?>" href="ventes_mois.php">
+                            <i class="bi bi-calendar-check me-1"></i>Ventes/Mois
+                        </a>
+                    </li>
                     
+                    <!-- Par Province -->
+                    <li class="nav-item">
+                        <a class="nav-link <?php echo $currentPage=='ventes_province.php'?'active':''; ?>" href="ventes_province.php">
+                            <i class="bi bi-geo-alt me-1"></i>Par Province
+                        </a>
+                    </li>
+                    
+                    <!-- Comparaison -->
+                    <li class="nav-item">
+                        <a class="nav-link <?php echo $currentPage=='comparaison.php'?'active':''; ?>" href="comparaison.php">
+                            <i class="bi bi-bar-chart me-1"></i>Comparaison
+                        </a>
+                    </li>
+                    
+                    <!-- Régions -->
+                    <li class="nav-item">
+                        <a class="nav-link <?php echo $currentPage=='regions.php'?'active':''; ?>" href="regions.php">
+                            <i class="bi bi-map me-1"></i>Régions
+                        </a>
+                    </li>
+                    
+                    <!-- Prévisions -->
+                    <li class="nav-item">
+                        <a class="nav-link <?php echo $currentPage=='previsions.php'?'active':''; ?>" href="previsions.php">
+                            <i class="bi bi-graph-up-arrow me-1"></i>Prévisions
+                        </a>
+                    </li>
+                    
+                    <!-- Données (dropdown) -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle <?php echo in_array($currentPage,['export.php','import/import.php','import/sectorisation.php','ajout_mois.php'])?'active':''; ?>" href="#" data-bs-toggle="dropdown"><i class="bi bi-folder-symlink me-1"></i>Données</a>
+                        <a class="nav-link dropdown-toggle <?php echo in_array($currentPage,['export.php','import/import.php','import/sectorisation.php','ajout_mois.php','import/import_ventes_delegues.php','import/mapping_provinces.php','import/rapport_delegues.php'])?'active':''; ?>" 
+                           href="#" data-bs-toggle="dropdown">
+                            <i class="bi bi-folder-symlink me-1"></i>Données
+                        </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="ajout_mois.php"><i class="bi bi-plus-circle me-2"></i>Ajouter un mois</a></li>
                             <li><a class="dropdown-item" href="import/import.php"><i class="bi bi-upload me-2"></i>Importer ventes</a></li>
                             <li><a class="dropdown-item" href="import/sectorisation.php"><i class="bi bi-diagram-3 me-2"></i>Importer sectorisation</a></li>
+                            
+                            <!-- SECTION ADMIN UNIQUEMENT -->
+                            <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><h6 class="dropdown-header">🔒 Espace Admin</h6></li>
+                            <li><a class="dropdown-item" href="import/import_ventes_delegues.php"><i class="bi bi-person-badge me-2"></i>Import Ventes Délégués</a></li>
+                            <li><a class="dropdown-item" href="import/mapping_provinces.php"><i class="bi bi-geo-alt me-2"></i>Mapping Provinces</a></li>
+                            <li><a class="dropdown-item" href="import/rapport_delegues.php"><i class="bi bi-file-earmark-bar-graph me-2"></i>Rapport Délégués</a></li>
+                            <?php endif; ?>
+                            
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="export.php"><i class="bi bi-file-earmark-excel me-2"></i>Export Excel</a></li>
                             <li><a class="dropdown-item text-danger" href="reset_data.php"><i class="bi bi-exclamation-triangle me-2"></i>Réinitialiser données</a></li>
@@ -125,6 +181,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                     </li>
                 </ul>
                 
+                <!-- Badge utilisateur -->
                 <div class="user-badge d-flex align-items-center">
                     <span>👤 <?php echo htmlspecialchars($_SESSION['nom'] ?? $_SESSION['username']); ?></span>
                     <?php if (isset($_SESSION['labo']) && $_SESSION['labo'] !== 'admin'): ?>
