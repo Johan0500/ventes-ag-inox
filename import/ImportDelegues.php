@@ -1,5 +1,6 @@
 <?php
 
+require_once __DIR__ . '/../lib/SimpleExcel.php';
 require_once __DIR__ . '/../config/database.php';
 
 class ImportDelegues {
@@ -11,10 +12,8 @@ class ImportDelegues {
     private array $erreurs = [];
     private array $non_attribues = [];
 
-    // Cache pour éviter les requêtes répétées
     private array $cache_secteurs = [];
     private array $cache_delegues = [];
-    private array $cache_produits = [];
 
     public function __construct(PDO $pdo) {
         $this->pdo = $pdo;
@@ -27,18 +26,16 @@ class ImportDelegues {
         $this->grossiste_code = $grossiste_code;
         $this->mois = $mois;
 
-        // Vérifier que le fichier existe
         if (!file_exists($filepath)) {
             return ['success' => false, 'message' => 'Fichier introuvable : ' . $filepath];
         }
 
-        // Détecter le format
         $ext = strtolower(pathinfo($filepath, PATHINFO_EXTENSION));
         
         try {
             $lignes = ($ext === 'csv')
                 ? $this->lireCSV($filepath)
-                : $this->lireExcel($filepath);
+                : $this->lireExcelSimple($filepath);
         } catch (Exception $e) {
             return ['success' => false, 'message' => 'Erreur lecture fichier : ' . $e->getMessage()];
         }
@@ -47,14 +44,12 @@ class ImportDelegues {
             return ['success' => false, 'message' => 'Fichier vide ou aucune ligne valide trouvée'];
         }
 
-        // Créer le log d'import
         try {
             $this->import_id = $this->creerLogImport($grossiste_code, basename($filepath), $mois, count($lignes));
         } catch (Exception $e) {
             return ['success' => false, 'message' => 'Erreur création log : ' . $e->getMessage()];
         }
 
-        // Traiter chaque ligne
         $nb_attribuees = 0;
         $nb_non_attribuees = 0;
 
@@ -86,7 +81,6 @@ class ImportDelegues {
             return ['success' => false, 'message' => 'Erreur transaction : ' . $e->getMessage()];
         }
 
-        // Mettre à jour le log
         try {
             $this->finaliserLogImport($nb_attribuees, $nb_non_attribuees);
         } catch (Exception $e) {
@@ -119,14 +113,13 @@ class ImportDelegues {
 
         if (empty($province) || empty($libelle) || $qte <= 0) {
             return [
-                'raison'   => 'Ligne incomplète (province, produit ou quantité)',
+                'raison'   => 'Ligne incomplète',
                 'province' => $province,
                 'produit'  => $libelle,
                 'qte'      => $qte
             ];
         }
 
-        // 1. Trouver le secteur via la province
         $secteur_id = $this->trouverSecteur($province);
         if (!$secteur_id) {
             return [
@@ -137,7 +130,6 @@ class ImportDelegues {
             ];
         }
 
-        // 2. Trouver le délégué de ce secteur qui vend ce produit
         $delegue_id = $this->trouverDelegue($secteur_id, $libelle);
         if (!$delegue_id) {
             return [
@@ -149,7 +141,6 @@ class ImportDelegues {
             ];
         }
 
-        // 3. Insérer la vente attribuée
         $sql = "INSERT INTO ventes_delegues
                     (delegue_id, secteur_id, code_client, designation_client, province,
                      code_cip, libelle_article, grossiste_code, mois, qte_livree, ug_livree,
@@ -190,7 +181,7 @@ class ImportDelegues {
         try {
             $stmt = $this->pdo->prepare("
                 SELECT secteur_id FROM province_secteur
-                WHERE UPPER(province) = :province
+                WHERE UPPER(province_code) = :province
                 LIMIT 1
             ");
             $stmt->execute([':province' => $province]);
@@ -252,52 +243,9 @@ class ImportDelegues {
     }
 
     /**
-     * LECTURE DU FICHIER EXCEL (avec fallback SimpleExcel)
-     */
-    private function lireExcel(string $filepath): array {
-        // Essayer d'abord avec PhpSpreadsheet
-        $vendorAutoload = dirname(__DIR__) . '/vendor/autoload.php';
-        
-        if (file_exists($vendorAutoload)) {
-            require_once $vendorAutoload;
-            
-            if (class_exists('PhpOffice\PhpSpreadsheet\IOFactory')) {
-                try {
-                    $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($filepath);
-                    $ws = null;
-                    foreach ($spreadsheet->getSheetNames() as $name) {
-                        if (stripos($name, 'eclat') !== false || stripos($name, 'detail') !== false) {
-                            $ws = $spreadsheet->getSheetByName($name);
-                            break;
-                        }
-                    }
-                    if (!$ws) $ws = $spreadsheet->getActiveSheet();
-                    $rows = $ws->toArray();
-                    if (count($rows) >= 4) {
-                        return $this->parserLignesExcel($rows);
-                    }
-                } catch (Exception $e) {
-                    // Fallback vers SimpleExcel
-                }
-            }
-        }
-        
-        // Fallback : utiliser SimpleExcel
-        return $this->lireExcelSimple($filepath);
-    }
-
-    /**
-     * LECTURE AVEC SimpleExcel (fallback)
+     * LECTURE DU FICHIER EXCEL
      */
     private function lireExcelSimple(string $filepath): array {
-        $simpleExcelPath = dirname(__DIR__) . '/lib/SimpleExcel.php';
-        if (!file_exists($simpleExcelPath)) {
-            return [];
-        }
-        
-        require_once $simpleExcelPath;
-        
-        // Vérifier que la classe existe
         if (!class_exists('SimpleExcel')) {
             return [];
         }
@@ -315,22 +263,31 @@ class ImportDelegues {
     }
 
     /**
-     * PARSER LES LIGNES EXCEL EN DONNÉES STRUCTURÉES
+     * PARSER LES LIGNES EXCEL
      */
     private function parserLignesExcel(array $rows): array {
         $lignes = [];
 
         $mois_dt  = new DateTime($this->mois . '-01');
         $mois_nom = strtolower($mois_dt->format('F'));
-        $col_qte  = 16;
-        $col_ug   = 17;
+        
+        $mois_fr = [
+            'january'=>'janvier','february'=>'fevrier','march'=>'mars',
+            'april'=>'avril','may'=>'mai','june'=>'juin',
+            'july'=>'juillet','august'=>'aout','september'=>'septembre',
+            'october'=>'octobre','november'=>'novembre','december'=>'decembre'
+        ];
+        $mois_fr_nom = $mois_fr[$mois_nom] ?? $mois_nom;
+        
+        $col_qte = 16;
+        $col_ug  = 17;
 
-        // Détecter la colonne du mois
         if (isset($rows[1])) {
             foreach ([12, 14, 16] as $col) {
                 if (!isset($rows[1][$col])) continue;
                 $val = strtolower(trim((string)($rows[1][$col] ?? '')));
-                if ($val && strpos($mois_nom, substr($val, 0, 3)) !== false) {
+                if ($val && (strpos($val, substr($mois_fr_nom, 0, 3)) !== false || 
+                             strpos($val, substr($mois_nom, 0, 3)) !== false)) {
                     $col_qte = $col;
                     $col_ug  = $col + 1;
                     break;
@@ -338,18 +295,11 @@ class ImportDelegues {
             }
         }
 
-        // Ligne 3 (index 2) = en-têtes des colonnes
-        // Données à partir de la ligne 4 (index 3)
         for ($i = 3; $i < count($rows); $i++) {
             $row = $rows[$i];
-            
-            // Vérifier que la ligne a assez de colonnes
             if (count($row) < 12) continue;
-            
-            // Ignorer les lignes vides
             if (empty($row[5]) && empty($row[7])) continue;
             
-            // Récupérer la quantité du mois sélectionné
             $qte = intval($row[$col_qte] ?? 0);
             if ($qte <= 0) continue;
 
@@ -369,7 +319,7 @@ class ImportDelegues {
     }
 
     /**
-     * LECTURE D'UN FICHIER CSV
+     * LECTURE CSV
      */
     private function lireCSV(string $filepath): array {
         $lignes = [];
@@ -377,10 +327,7 @@ class ImportDelegues {
         if (!$handle) return [];
 
         $first_line = fgets($handle);
-        if ($first_line === false) {
-            fclose($handle);
-            return [];
-        }
+        if ($first_line === false) { fclose($handle); return []; }
         
         rewind($handle);
         $sep = (substr_count($first_line, ';') > substr_count($first_line, ',')) ? ';' : ',';
@@ -391,15 +338,12 @@ class ImportDelegues {
                 $headers = array_map('strtolower', array_map('trim', $row));
                 continue;
             }
-            
             $data = [];
             foreach ($headers as $i => $header) {
                 $data[$header] = $row[$i] ?? '';
             }
-
             $qte = intval($data['qte livree'] ?? $data['qte_livree'] ?? $data['quantite'] ?? 0);
             if ($qte <= 0) continue;
-
             $lignes[] = [
                 'code_client'        => $data['code client']    ?? $data['code_client'] ?? null,
                 'designation_client' => $data['designation client'] ?? $data['client'] ?? '',
@@ -416,36 +360,24 @@ class ImportDelegues {
         return $lignes;
     }
 
-    /**
-     * CRÉER UN LOG D'IMPORT
-     */
     private function creerLogImport(string $grossiste, string $fichier, string $mois, int $nb_total): int {
         $stmt = $this->pdo->prepare("
             INSERT INTO imports_delegues (grossiste_code, fichier_nom, mois_import, nb_lignes_total, statut)
             VALUES (:grossiste, :fichier, :mois, :nb, 'en_cours')
         ");
         $stmt->execute([
-            ':grossiste' => $grossiste,
-            ':fichier'   => $fichier,
-            ':mois'      => $mois . '-01',
-            ':nb'        => $nb_total
+            ':grossiste' => $grossiste, ':fichier' => $fichier,
+            ':mois' => $mois . '-01', ':nb' => $nb_total
         ]);
         return (int)$this->pdo->lastInsertId();
     }
 
-    /**
-     * FINALISER LE LOG D'IMPORT
-     */
     private function finaliserLogImport(int $nb_att, int $nb_non): void {
         $stmt = $this->pdo->prepare("
             UPDATE imports_delegues
             SET nb_attribuees = :att, nb_non_attribuees = :non, statut = 'termine'
             WHERE id = :id
         ");
-        $stmt->execute([
-            ':att' => $nb_att,
-            ':non' => $nb_non,
-            ':id'  => $this->import_id
-        ]);
+        $stmt->execute([':att' => $nb_att, ':non' => $nb_non, ':id' => $this->import_id]);
     }
 }
