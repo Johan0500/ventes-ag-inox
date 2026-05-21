@@ -56,18 +56,18 @@ try {
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
         <div class="container">
-            <a class="navbar-brand" href="index.php">🏥 INOX PHARMA</a>
+            <a class="navbar-brand" href="/inox-pharma-ventes/index.php">🏥 INOX PHARMA</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="index.php"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link" href="produits.php"><i class="bi bi-box"></i> Produits</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="clients.php"><i class="bi bi-shop"></i> Clients</a></li>
-                    <li class="nav-item"><a class="nav-link" href="comparaison.php"><i class="bi bi-bar-chart"></i> Comparaison</a></li>
-                    <li class="nav-item"><a class="nav-link" href="regions.php"><i class="bi bi-map"></i> Régions</a></li>
-                    <li class="nav-item"><a class="nav-link" href="export.php"><i class="bi bi-download"></i> Export</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/inox-pharma-ventes/index.php"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/inox-pharma-ventes/produits.php"><i class="bi bi-box"></i> Produits</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/inox-pharma-ventes/clients.php"><i class="bi bi-shop"></i> Clients</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/inox-pharma-ventes/comparaison.php"><i class="bi bi-bar-chart"></i> Comparaison</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/inox-pharma-ventes/regions.php"><i class="bi bi-map"></i> Régions</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/inox-pharma-ventes/export.php"><i class="bi bi-download"></i> Export</a></li>
                 </ul>
             </div>
         </div>
@@ -76,7 +76,7 @@ try {
     <div class="container mt-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h3><i class="bi bi-shop"></i> Clients <small class="text-muted">(<?php echo $totalClients; ?> au total)</small></h3>
-            <a href="clients.php?all=1" class="btn btn-outline-primary">📋 Voir tous les clients</a>
+            <a href="/inox-pharma-ventes/clients.php?all=1" class="btn btn-outline-primary">📋 Voir tous les clients</a>
         </div>
         
         <div class="card mb-4">
@@ -129,7 +129,7 @@ try {
                                     <td class="text-center"><?php echo $c['nb_produits']; ?></td>
                                     <td><?php echo $c['dernier_achat'] ? date('d/m/Y', strtotime($c['dernier_achat'])) : '-'; ?></td>
                                     <td>
-                                        <a href="client_detail.php?client=<?php echo $c['code_client']; ?>" 
+                                        <a href="/inox-pharma-ventes/client_detail.php?client=<?php echo $c['code_client']; ?>" 
                                            class="btn btn-sm btn-outline-primary">📊 Détail</a>
                                     </td>
                                 </tr>

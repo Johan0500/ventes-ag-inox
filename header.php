@@ -3,6 +3,9 @@ require_once __DIR__ . '/auth.php';
 requireLogin();
 
 $currentPage = basename($_SERVER['PHP_SELF']);
+
+// Détermine le chemin de base absolu (fonctionne depuis n'importe quel sous-dossier)
+$base = '/inox-pharma-ventes/';
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -84,7 +87,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
         <div class="container">
-            <a class="navbar-brand" href="index.php">🏥 INOX PHARMA</a>
+            <a class="navbar-brand" href="<?php echo $base; ?>index.php">🏥 INOX PHARMA</a>
             <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -92,7 +95,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                 <ul class="navbar-nav me-auto">
                     <!-- Dashboard -->
                     <li class="nav-item">
-                        <a class="nav-link <?php echo $currentPage=='index.php'?'active':''; ?>" href="index.php">
+                        <a class="nav-link <?php echo $currentPage=='index.php'?'active':''; ?>" href="<?php echo $base; ?>index.php">
                             <i class="bi bi-speedometer2 me-1"></i>Dashboard
                         </a>
                     </li>
@@ -103,8 +106,8 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                             <i class="bi bi-box me-1"></i>Produits
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="produits.php"><i class="bi bi-search me-2"></i>Rechercher</a></li>
-                            <li><a class="dropdown-item" href="produits.php?all=1"><i class="bi bi-list-ul me-2"></i>Tous les produits</a></li>
+                            <li><a class="dropdown-item" href="<?php echo $base; ?>produits.php"><i class="bi bi-search me-2"></i>Rechercher</a></li>
+                            <li><a class="dropdown-item" href="<?php echo $base; ?>produits.php?all=1"><i class="bi bi-list-ul me-2"></i>Tous les produits</a></li>
                         </ul>
                     </li>
                     
@@ -114,69 +117,69 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                             <i class="bi bi-shop me-1"></i>Clients
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="clients.php"><i class="bi bi-search me-2"></i>Rechercher</a></li>
-                            <li><a class="dropdown-item" href="clients.php?all=1"><i class="bi bi-list-ul me-2"></i>Tous les clients</a></li>
+                            <li><a class="dropdown-item" href="<?php echo $base; ?>clients.php"><i class="bi bi-search me-2"></i>Rechercher</a></li>
+                            <li><a class="dropdown-item" href="<?php echo $base; ?>clients.php?all=1"><i class="bi bi-list-ul me-2"></i>Tous les clients</a></li>
                         </ul>
                     </li>
                     
                     <!-- Ventes par mois -->
                     <li class="nav-item">
-                        <a class="nav-link <?php echo $currentPage=='ventes_mois.php'?'active':''; ?>" href="ventes_mois.php">
+                        <a class="nav-link <?php echo $currentPage=='ventes_mois.php'?'active':''; ?>" href="<?php echo $base; ?>ventes_mois.php">
                             <i class="bi bi-calendar-check me-1"></i>Ventes/Mois
                         </a>
                     </li>
                     
                     <!-- Par Province -->
                     <li class="nav-item">
-                        <a class="nav-link <?php echo $currentPage=='ventes_province.php'?'active':''; ?>" href="ventes_province.php">
+                        <a class="nav-link <?php echo $currentPage=='ventes_province.php'?'active':''; ?>" href="<?php echo $base; ?>ventes_province.php">
                             <i class="bi bi-geo-alt me-1"></i>Par Province
                         </a>
                     </li>
                     
                     <!-- Comparaison -->
                     <li class="nav-item">
-                        <a class="nav-link <?php echo $currentPage=='comparaison.php'?'active':''; ?>" href="comparaison.php">
+                        <a class="nav-link <?php echo $currentPage=='comparaison.php'?'active':''; ?>" href="<?php echo $base; ?>comparaison.php">
                             <i class="bi bi-bar-chart me-1"></i>Comparaison
                         </a>
                     </li>
                     
                     <!-- Régions -->
                     <li class="nav-item">
-                        <a class="nav-link <?php echo $currentPage=='regions.php'?'active':''; ?>" href="regions.php">
+                        <a class="nav-link <?php echo $currentPage=='regions.php'?'active':''; ?>" href="<?php echo $base; ?>regions.php">
                             <i class="bi bi-map me-1"></i>Régions
                         </a>
                     </li>
                     
                     <!-- Prévisions -->
                     <li class="nav-item">
-                        <a class="nav-link <?php echo $currentPage=='previsions.php'?'active':''; ?>" href="previsions.php">
+                        <a class="nav-link <?php echo $currentPage=='previsions.php'?'active':''; ?>" href="<?php echo $base; ?>previsions.php">
                             <i class="bi bi-graph-up-arrow me-1"></i>Prévisions
                         </a>
                     </li>
                     
                     <!-- Données (dropdown) -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle <?php echo in_array($currentPage,['export.php','import/import.php','import/sectorisation.php','ajout_mois.php','import/import_ventes_delegues.php','import/mapping_provinces.php','import/rapport_delegues.php'])?'active':''; ?>" 
+                        <a class="nav-link dropdown-toggle <?php echo in_array($currentPage,['export.php','import.php','sectorisation.php','ajout_mois.php','import_ventes_delegues.php','mapping_provinces.php','rapport_delegues.php'])?'active':''; ?>" 
                            href="#" data-bs-toggle="dropdown">
                             <i class="bi bi-folder-symlink me-1"></i>Données
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="ajout_mois.php"><i class="bi bi-plus-circle me-2"></i>Ajouter un mois</a></li>
-                            <li><a class="dropdown-item" href="import/import.php"><i class="bi bi-upload me-2"></i>Importer ventes</a></li>
-                            <li><a class="dropdown-item" href="import/sectorisation.php"><i class="bi bi-diagram-3 me-2"></i>Importer sectorisation</a></li>
+                            <li><a class="dropdown-item" href="<?php echo $base; ?>ajout_mois.php"><i class="bi bi-plus-circle me-2"></i>Ajouter un mois</a></li>
+                            <li><a class="dropdown-item" href="<?php echo $base; ?>import/import.php"><i class="bi bi-upload me-2"></i>Importer ventes</a></li>
+                            <li><a class="dropdown-item" href="<?php echo $base; ?>import/sectorisation.php"><i class="bi bi-diagram-3 me-2"></i>Importer sectorisation</a></li>
                             
                             <!-- SECTION ADMIN UNIQUEMENT -->
                             <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
                             <li><hr class="dropdown-divider"></li>
                             <li><h6 class="dropdown-header">🔒 Espace Admin</h6></li>
-                            <li><a class="dropdown-item" href="import/import_ventes_delegues.php"><i class="bi bi-person-badge me-2"></i>Import Ventes Délégués</a></li>
-                            <li><a class="dropdown-item" href="import/mapping_provinces.php"><i class="bi bi-geo-alt me-2"></i>Mapping Provinces</a></li>
-                            <li><a class="dropdown-item" href="import/rapport_delegues.php"><i class="bi bi-file-earmark-bar-graph me-2"></i>Rapport Délégués</a></li>
+                            <li><a class="dropdown-item" href="<?php echo $base; ?>import/import_ventes_delegues.php"><i class="bi bi-person-badge me-2"></i>Import Ventes Délégués</a></li>
+                            <li><a class="dropdown-item" href="<?php echo $base; ?>import/mapping_provinces.php"><i class="bi bi-geo-alt me-2"></i>Mapping Provinces</a></li>
+                            <li><a class="dropdown-item" href="<?php echo $base; ?>import/rapport_delegues.php"><i class="bi bi-file-earmark-bar-graph me-2"></i>Rapport Délégués</a></li>
                             <?php endif; ?>
                             
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="export.php"><i class="bi bi-file-earmark-excel me-2"></i>Export Excel</a></li>
-                            <li><a class="dropdown-item text-danger" href="reset_data.php"><i class="bi bi-exclamation-triangle me-2"></i>Réinitialiser données</a></li>
+                            <li><a class="dropdown-item" href="<?php echo $base; ?>export.php"><i class="bi bi-file-earmark-excel me-2"></i>Export Excel</a></li>
+                            <li><a class="dropdown-item text-danger" href="<?php echo $base; ?>reset_data.php"><i class="bi bi-exclamation-triangle me-2"></i>Réinitialiser données</a></li>
                         </ul>
                     </li>
                 </ul>
@@ -187,7 +190,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                     <?php if (isset($_SESSION['labo']) && $_SESSION['labo'] !== 'admin'): ?>
                     <span class="labo-badge">🔬 <?php echo $_SESSION['labo'] === 'croient' ? 'Croient' : 'LIC'; ?></span>
                     <?php endif; ?>
-                    <a href="logout.php" class="ms-2" title="Déconnexion">🚪</a>
+                    <a href="<?php echo $base; ?>logout.php" class="ms-2" title="Déconnexion">🚪</a>
                 </div>
             </div>
         </div>

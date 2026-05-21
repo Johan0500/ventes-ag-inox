@@ -77,7 +77,11 @@ class ImportDelegues {
             
             $this->pdo->commit();
         } catch (Exception $e) {
-            $this->pdo->rollBack();
+            if ($this->pdo->inTransaction()) {
+
+                $this->pdo->rollBack();
+
+            }
             return ['success' => false, 'message' => 'Erreur transaction : ' . $e->getMessage()];
         }
 

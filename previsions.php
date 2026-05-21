@@ -140,7 +140,7 @@ if ($n >= 3) {
                         $evol = $pt['qte_m2'] > 0 ? round((($pt['qte_m1'] - $pt['qte_m2']) / $pt['qte_m2']) * 100, 1) : 100;
                     ?>
                     <tr>
-                        <td><a href="produit_detail.php?cip=<?php echo $pt['code_cip']; ?>"><?php echo htmlspecialchars($pt['libelle']); ?></a></td>
+                        <td><a href="/inox-pharma-ventes/produit_detail.php?cip=<?php echo $pt['code_cip']; ?>"><?php echo htmlspecialchars($pt['libelle']); ?></a></td>
                         <td class="text-end"><?php echo number_format($pt['qte_m2']); ?></td>
                         <td class="text-end"><strong><?php echo number_format($pt['qte_m1']); ?></strong></td>
                         <td class="text-end">

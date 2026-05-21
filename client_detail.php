@@ -14,7 +14,7 @@ $stmt->execute([$codeClient]);
 $client = $stmt->fetch();
 
 if (!$client) {
-    echo "<script>alert('Client non trouvé'); window.location.href='clients.php';</script>";
+    echo "<script>alert('Client non trouvé'); window.location.href='/inox-pharma-ventes/clients.php';</script>";
     exit;
 }
 
@@ -78,12 +78,12 @@ foreach ($ventes as $v) {
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
         <div class="container">
-            <a class="navbar-brand" href="index.php">🏥 INOX PHARMA</a>
+            <a class="navbar-brand" href="/inox-pharma-ventes/index.php">🏥 INOX PHARMA</a>
             <div class="collapse navbar-collapse">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="index.php"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link" href="produits.php"><i class="bi bi-box"></i> Produits</a></li>
-                    <li class="nav-item"><a class="nav-link" href="clients.php"><i class="bi bi-shop"></i> Clients</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/inox-pharma-ventes/index.php"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/inox-pharma-ventes/produits.php"><i class="bi bi-box"></i> Produits</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/inox-pharma-ventes/clients.php"><i class="bi bi-shop"></i> Clients</a></li>
                 </ul>
             </div>
         </div>
@@ -92,8 +92,8 @@ foreach ($ventes as $v) {
     <div class="container mt-4">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="index.php">Accueil</a></li>
-                <li class="breadcrumb-item"><a href="clients.php">Clients</a></li>
+                <li class="breadcrumb-item"><a href="/inox-pharma-ventes/index.php">Accueil</a></li>
+                <li class="breadcrumb-item"><a href="/inox-pharma-ventes/clients.php">Clients</a></li>
                 <li class="breadcrumb-item active"><?php echo htmlspecialchars($client['designation']); ?></li>
             </ol>
         </nav>
@@ -161,7 +161,7 @@ foreach ($ventes as $v) {
                             <?php foreach ($produits as $p): ?>
                             <li class="list-group-item d-flex justify-content-between align-items-start">
                                 <div>
-                                    <a href="produit_detail.php?cip=<?php echo $p['code_cip']; ?>" class="text-decoration-none small">
+                                    <a href="/inox-pharma-ventes/produit_detail.php?cip=<?php echo $p['code_cip']; ?>" class="text-decoration-none small">
                                         <?php echo htmlspecialchars($p['libelle']); ?>
                                     </a>
                                 </div>

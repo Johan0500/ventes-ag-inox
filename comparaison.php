@@ -119,15 +119,15 @@ try {
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
         <div class="container">
-            <a class="navbar-brand" href="index.php">🏥 INOX PHARMA</a>
+            <a class="navbar-brand" href="/inox-pharma-ventes/index.php">🏥 INOX PHARMA</a>
             <div class="collapse navbar-collapse">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="index.php">Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link" href="produits.php">Produits</a></li>
-                    <li class="nav-item"><a class="nav-link" href="clients.php">Clients</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="comparaison.php">Comparaison</a></li>
-                    <li class="nav-item"><a class="nav-link" href="regions.php">Régions</a></li>
-                    <li class="nav-item"><a class="nav-link" href="export.php">Export</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/inox-pharma-ventes/index.php">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/inox-pharma-ventes/produits.php">Produits</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/inox-pharma-ventes/clients.php">Clients</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/inox-pharma-ventes/comparaison.php">Comparaison</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/inox-pharma-ventes/regions.php">Régions</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/inox-pharma-ventes/export.php">Export</a></li>
                 </ul>
             </div>
         </div>
@@ -139,7 +139,7 @@ try {
         <?php if (!$dataLoaded): ?>
             <div class="alert alert-warning">
                 <h4>⚠️ Aucune donnée disponible</h4>
-                <p>Importez d'abord vos données via <a href="import/import.php">la page d'importation</a>.</p>
+                <p>Importez d'abord vos données via <a href="/inox-pharma-ventes/import/import.php">la page d'importation</a>.</p>
             </div>
         <?php else: ?>
 
@@ -236,9 +236,9 @@ try {
                                 <tr>
                                     <td>
                                         <?php if ($mode == 'produits'): ?>
-                                        <a href="produit_detail.php?cip=<?php echo $r['code_cip']; ?>"><?php echo htmlspecialchars($r['libelle']); ?></a>
+                                        <a href="/inox-pharma-ventes/produit_detail.php?cip=<?php echo $r['code_cip']; ?>"><?php echo htmlspecialchars($r['libelle']); ?></a>
                                         <?php else: ?>
-                                        <a href="client_detail.php?client=<?php echo $r['code_client']; ?>"><?php echo htmlspecialchars($r['designation']); ?></a>
+                                        <a href="/inox-pharma-ventes/client_detail.php?client=<?php echo $r['code_client']; ?>"><?php echo htmlspecialchars($r['designation']); ?></a>
                                         <?php endif; ?>
                                     </td>
                                     <td class="text-end"><?php echo number_format($r['qte_m1']); ?></td>

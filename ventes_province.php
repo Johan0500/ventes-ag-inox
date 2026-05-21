@@ -231,7 +231,7 @@ $grossNames = ['tedis'=>'TEDIS', 'dpci'=>'DPCI', 'laborex'=>'LABOREX', 'copharme
             <input type="hidden" name="nom" value="<?php echo htmlspecialchars($produitNom); ?>">
             <input type="hidden" name="cip" value="<?php echo htmlspecialchars($cipFiltre); ?>">
             <div class="col-md-2">
-                <a href="ventes_province.php" class="btn btn-outline-secondary w-100">✕ Reset</a>
+                <a href="/inox-pharma-ventes/ventes_province.php" class="btn btn-outline-secondary w-100">✕ Reset</a>
             </div>
         </form>
     </div>

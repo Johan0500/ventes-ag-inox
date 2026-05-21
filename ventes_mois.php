@@ -146,7 +146,7 @@ $totalPages = ceil($totalVentes / $parPage);
     <div class="card-body">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="mb-0">📅 Sélectionnez un mois</h5>
-            <a href="ajout_mois.php" class="btn btn-sm btn-outline-success">➕ Ajouter un mois</a>
+            <a href="/inox-pharma-ventes/ajout_mois.php" class="btn btn-sm btn-outline-success">➕ Ajouter un mois</a>
         </div>
         <div class="mois-selector">
             <?php foreach ($moisDisponibles as $m): 
@@ -235,7 +235,7 @@ $totalPages = ceil($totalVentes / $parPage);
             <div class="card-body p-0">
                 <div class="list-group list-group-flush">
                     <?php foreach ($produits_stats as $i => $ps): ?>
-                    <a href="produit_detail.php?cip=<?php echo $ps['code_cip']; ?>" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    <a href="/inox-pharma-ventes/produit_detail.php?cip=<?php echo $ps['code_cip']; ?>" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                         <div>
                             <span class="badge bg-<?php echo ['warning','secondary','danger'][$i]??'primary'; ?> me-2"><?php echo $i+1; ?></span>
                             <span class="small"><?php echo htmlspecialchars($ps['libelle']); ?></span>
@@ -279,7 +279,7 @@ $totalPages = ceil($totalVentes / $parPage);
                 <span class="text-muted small"><?php echo number_format($totalVentes); ?> lignes trouvées</span>
             </div>
             <div class="col-md-2 text-end">
-                <a href="export.php?format=excel&type=ventes_mois&mois=<?php echo $moisSelectionne; ?>" class="btn btn-sm btn-outline-success">📥 Export Excel</a>
+                <a href="/inox-pharma-ventes/export.php?format=excel&type=ventes_mois&mois=<?php echo $moisSelectionne; ?>" class="btn btn-sm btn-outline-success">📥 Export Excel</a>
             </div>
         </form>
     </div>
@@ -314,13 +314,13 @@ $totalPages = ceil($totalVentes / $parPage);
                     <tr class="highlight-row">
                         <td><small class="text-muted"><?php echo $numLigne; ?></small></td>
                         <td>
-                            <a href="produit_detail.php?cip=<?php echo $v['code_cip']; ?>" class="text-decoration-none small fw-bold">
+                            <a href="/inox-pharma-ventes/produit_detail.php?cip=<?php echo $v['code_cip']; ?>" class="text-decoration-none small fw-bold">
                                 <?php echo htmlspecialchars($v['produit']); ?>
                             </a>
                         </td>
                         <td><code class="small"><?php echo htmlspecialchars($v['code_cip']); ?></code></td>
                         <td>
-                            <a href="client_detail.php?client=<?php echo $v['code_client']; ?>" class="text-decoration-none small">
+                            <a href="/inox-pharma-ventes/client_detail.php?client=<?php echo $v['code_client']; ?>" class="text-decoration-none small">
                                 <?php echo htmlspecialchars($v['client']); ?>
                             </a>
                         </td>
@@ -331,8 +331,8 @@ $totalPages = ceil($totalVentes / $parPage);
                         <td class="text-end"><strong><?php echo number_format($v['montant'], 0, ',', ' '); ?> F</strong></td>
                         <td>
                             <div class="btn-group btn-group-sm">
-                                <a href="produit_detail.php?cip=<?php echo $v['code_cip']; ?>" class="btn btn-outline-primary btn-sm" title="Voir produit">📦</a>
-                                <a href="client_detail.php?client=<?php echo $v['code_client']; ?>" class="btn btn-outline-success btn-sm" title="Voir client">🏪</a>
+                                <a href="/inox-pharma-ventes/produit_detail.php?cip=<?php echo $v['code_cip']; ?>" class="btn btn-outline-primary btn-sm" title="Voir produit">📦</a>
+                                <a href="/inox-pharma-ventes/client_detail.php?client=<?php echo $v['code_client']; ?>" class="btn btn-outline-success btn-sm" title="Voir client">🏪</a>
                             </div>
                         </td>
                     </tr>

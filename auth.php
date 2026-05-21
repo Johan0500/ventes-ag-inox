@@ -12,7 +12,7 @@ function isLoggedIn(): bool {
 function requireLogin(): void {
     if (!isLoggedIn()) {
         $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
-        header('Location: login.php');
+        header('Location: /inox-pharma-ventes/login.php');
         exit;
     }
     
@@ -21,7 +21,7 @@ function requireLogin(): void {
     $stmt->execute([$_SESSION['user_id']]);
     if (!$stmt->fetch()) {
         session_destroy();
-        header('Location: login.php?error=session_expired');
+        header('Location: /inox-pharma-ventes/login.php?error=session_expired');
         exit;
     }
     
@@ -111,7 +111,7 @@ function logout(): void {
     }
     
     session_destroy();
-    header('Location: login.php?message=logged_out');
+    header('Location: /inox-pharma-ventes/login.php?message=logged_out');
     exit;
 }
 

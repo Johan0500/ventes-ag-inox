@@ -53,18 +53,18 @@ $maxTotal = max(array_column($agences, 'total'));
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
         <div class="container">
-            <a class="navbar-brand" href="index.php">🏥 INOX PHARMA</a>
+            <a class="navbar-brand" href="/inox-pharma-ventes/index.php">🏥 INOX PHARMA</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="index.php"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link" href="produits.php"><i class="bi bi-box"></i> Produits</a></li>
-                    <li class="nav-item"><a class="nav-link" href="clients.php"><i class="bi bi-shop"></i> Clients</a></li>
-                    <li class="nav-item"><a class="nav-link" href="comparaison.php"><i class="bi bi-bar-chart"></i> Comparaison</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="regions.php"><i class="bi bi-map"></i> Régions</a></li>
-                    <li class="nav-item"><a class="nav-link" href="export.php"><i class="bi bi-download"></i> Export</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/inox-pharma-ventes/index.php"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/inox-pharma-ventes/produits.php"><i class="bi bi-box"></i> Produits</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/inox-pharma-ventes/clients.php"><i class="bi bi-shop"></i> Clients</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/inox-pharma-ventes/comparaison.php"><i class="bi bi-bar-chart"></i> Comparaison</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/inox-pharma-ventes/regions.php"><i class="bi bi-map"></i> Régions</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/inox-pharma-ventes/export.php"><i class="bi bi-download"></i> Export</a></li>
                 </ul>
             </div>
         </div>

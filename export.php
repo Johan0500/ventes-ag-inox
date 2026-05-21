@@ -143,7 +143,7 @@ require_once __DIR__ . '/header.php';
                 <div style="font-size:3rem;">📦</div>
                 <h5>Catalogue Produits</h5>
                 <p class="text-muted small">Liste complète avec ventes, CA et graphique Top 10</p>
-                <a href="export.php?format=excel&type=produits" class="btn btn-primary">📥 Télécharger</a>
+                <a href="/inox-pharma-ventes/export.php?format=excel&type=produits" class="btn btn-primary">📥 Télécharger</a>
             </div>
         </div>
     </div>
@@ -153,7 +153,7 @@ require_once __DIR__ . '/header.php';
                 <div style="font-size:3rem;">🏪</div>
                 <h5>Fichier Clients</h5>
                 <p class="text-muted small">Liste de tous les clients avec statistiques d'achats</p>
-                <a href="export.php?format=excel&type=clients" class="btn btn-success">📥 Télécharger</a>
+                <a href="/inox-pharma-ventes/export.php?format=excel&type=clients" class="btn btn-success">📥 Télécharger</a>
             </div>
         </div>
     </div>
@@ -163,7 +163,7 @@ require_once __DIR__ . '/header.php';
                 <div style="font-size:3rem;">💰</div>
                 <h5>Ventes Détaillées</h5>
                 <p class="text-muted small">Toutes les transactions avec montants (max 5000 lignes)</p>
-                <a href="export.php?format=excel&type=ventes" class="btn btn-info text-white">📥 Télécharger</a>
+                <a href="/inox-pharma-ventes/export.php?format=excel&type=ventes" class="btn btn-info text-white">📥 Télécharger</a>
             </div>
         </div>
     </div>
@@ -173,7 +173,7 @@ require_once __DIR__ . '/header.php';
                 <div style="font-size:3rem;">🏢</div>
                 <h5>Rapport Agences</h5>
                 <p class="text-muted small">Performance par agence avec top provinces</p>
-                <a href="export.php?format=excel&type=agences" class="btn btn-warning">📥 Télécharger</a>
+                <a href="/inox-pharma-ventes/export.php?format=excel&type=agences" class="btn btn-warning">📥 Télécharger</a>
             </div>
         </div>
     </div>

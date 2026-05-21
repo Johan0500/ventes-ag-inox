@@ -14,7 +14,7 @@ $stmt->execute([$cip]);
 $produit = $stmt->fetch();
 
 if (!$produit) {
-    echo "<script>alert('Produit non trouvé'); window.location.href='produits.php';</script>";
+    echo "<script>alert('Produit non trouvé'); window.location.href='/inox-pharma-ventes/produits.php';</script>";
     exit;
 }
 
@@ -74,12 +74,12 @@ $nbClientsTotal = count($clients);
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
         <div class="container">
-            <a class="navbar-brand" href="index.php">🏥 INOX PHARMA</a>
+            <a class="navbar-brand" href="/inox-pharma-ventes/index.php">🏥 INOX PHARMA</a>
             <div class="collapse navbar-collapse">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="index.php"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link" href="produits.php"><i class="bi bi-box"></i> Produits</a></li>
-                    <li class="nav-item"><a class="nav-link" href="clients.php"><i class="bi bi-shop"></i> Clients</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/inox-pharma-ventes/index.php"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/inox-pharma-ventes/produits.php"><i class="bi bi-box"></i> Produits</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/inox-pharma-ventes/clients.php"><i class="bi bi-shop"></i> Clients</a></li>
                 </ul>
             </div>
         </div>
@@ -88,8 +88,8 @@ $nbClientsTotal = count($clients);
     <div class="container mt-4">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="index.php">Accueil</a></li>
-                <li class="breadcrumb-item"><a href="produits.php">Produits</a></li>
+                <li class="breadcrumb-item"><a href="/inox-pharma-ventes/index.php">Accueil</a></li>
+                <li class="breadcrumb-item"><a href="/inox-pharma-ventes/produits.php">Produits</a></li>
                 <li class="breadcrumb-item active"><?php echo htmlspecialchars($produit['libelle']); ?></li>
             </ol>
         </nav>
@@ -157,7 +157,7 @@ $nbClientsTotal = count($clients);
                             <?php foreach ($clients as $c): ?>
                             <li class="list-group-item d-flex justify-content-between align-items-start">
                                 <div>
-                                    <a href="client_detail.php?client=<?php echo $c['code_client']; ?>" class="text-decoration-none">
+                                    <a href="/inox-pharma-ventes/client_detail.php?client=<?php echo $c['code_client']; ?>" class="text-decoration-none">
                                         <?php echo htmlspecialchars($c['designation']); ?>
                                     </a>
                                     <br><small class="text-muted"><?php echo htmlspecialchars($c['province']); ?></small>

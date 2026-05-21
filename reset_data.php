@@ -51,9 +51,9 @@ $nbAssoc = $pdo->query("SELECT COUNT(*) FROM grossiste_clients")->fetchColumn();
                     <p class="text-muted">Produits, clients, ventes, provinces et associations ont été supprimés.</p>
                     <p class="text-muted small">✅ Utilisateurs et grossistes conservés.</p>
                     <div class="mt-4 d-flex justify-content-center gap-2">
-                        <a href="index.php" class="btn btn-primary">📊 Dashboard</a>
-                        <a href="import/import.php" class="btn btn-success">📥 Importer ventes</a>
-                        <a href="import/sectorisation.php" class="btn btn-outline-primary">🗺️ Importer sectorisation</a>
+                        <a href="/inox-pharma-ventes/index.php" class="btn btn-primary">📊 Dashboard</a>
+                        <a href="/inox-pharma-ventes/import/import.php" class="btn btn-success">📥 Importer ventes</a>
+                        <a href="/inox-pharma-ventes/import/sectorisation.php" class="btn btn-outline-primary">🗺️ Importer sectorisation</a>
                     </div>
                 </div>
             </div>
@@ -130,7 +130,7 @@ $nbAssoc = $pdo->query("SELECT COUNT(*) FROM grossiste_clients")->fetchColumn();
                             <button type="submit" class="btn btn-danger btn-lg flex-grow-1">
                                 🗑️ Réinitialiser toutes les données
                             </button>
-                            <a href="index.php" class="btn btn-outline-secondary btn-lg">Annuler</a>
+                            <a href="/inox-pharma-ventes/index.php" class="btn btn-outline-secondary btn-lg">Annuler</a>
                         </div>
                     </form>
                 </div>

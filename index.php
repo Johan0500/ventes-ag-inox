@@ -209,8 +209,8 @@ $grossNames = ['tedis'=>'TEDIS', 'dpci'=>'DPCI', 'laborex'=>'LABOREX', 'copharme
     <h3 class="mt-3">Aucune donnée</h3>
     <p class="text-muted">Importez vos fichiers pour commencer</p>
     <div class="mt-3">
-        <a href="import/import.php" class="btn btn-primary btn-lg me-2">📥 Importer ventes</a>
-        <a href="import/sectorisation.php" class="btn btn-outline-primary btn-lg">🗺️ Importer sectorisation</a>
+        <a href="/inox-pharma-ventes/import/import.php" class="btn btn-primary btn-lg me-2">📥 Importer ventes</a>
+        <a href="/inox-pharma-ventes/import/sectorisation.php" class="btn btn-outline-primary btn-lg">🗺️ Importer sectorisation</a>
     </div>
 </div>
 <?php else: ?>
@@ -275,7 +275,7 @@ $grossNames = ['tedis'=>'TEDIS', 'dpci'=>'DPCI', 'laborex'=>'LABOREX', 'copharme
     </select>
     
     <?php if($moisFiltre!='all' || $grossisteFiltre!='all'): ?>
-    <a href="index.php" class="btn btn-sm btn-outline-secondary">✕ Réinitialiser</a>
+    <a href="/inox-pharma-ventes/index.php" class="btn btn-sm btn-outline-secondary">✕ Réinitialiser</a>
     <?php endif; ?>
 </div>
 
@@ -306,7 +306,7 @@ $grossNames = ['tedis'=>'TEDIS', 'dpci'=>'DPCI', 'laborex'=>'LABOREX', 'copharme
         <div class="card">
             <div class="card-header d-flex justify-content-between">
                 <span>📈 Évolution des ventes</span>
-                <a href="comparaison.php" class="text-decoration-none small">Comparer →</a>
+                <a href="/inox-pharma-ventes/comparaison.php" class="text-decoration-none small">Comparer →</a>
             </div>
             <div class="card-body"><div class="chart-container"><canvas id="ventesChart"></canvas></div></div>
         </div>
@@ -315,11 +315,11 @@ $grossNames = ['tedis'=>'TEDIS', 'dpci'=>'DPCI', 'laborex'=>'LABOREX', 'copharme
         <div class="card h-100">
             <div class="card-header d-flex justify-content-between">
                 <span>🏆 Top Produits</span>
-                <a href="produits.php?all=1" class="text-decoration-none small">Tous →</a>
+                <a href="/inox-pharma-ventes/produits.php?all=1" class="text-decoration-none small">Tous →</a>
             </div>
             <div class="card-body p-0" style="max-height:370px;overflow-y:auto;">
                 <?php foreach($topProduits as $i=>$p): ?>
-                <a href="produit_detail.php?cip=<?php echo $p['code_cip']; ?>" class="top-link">
+                <a href="/inox-pharma-ventes/produit_detail.php?cip=<?php echo $p['code_cip']; ?>" class="top-link">
                     <span class="rank <?php echo ['gold','silver','bronze'][$i]??''; ?>"><?php echo ['🥇','🥈','🥉'][$i]??($i+1); ?></span>
                     <span class="flex-grow-1 small"><?php echo htmlspecialchars($p['libelle']); ?></span>
                     <span class="badge bg-primary rounded-pill"><?php echo number_format($p['total']); ?></span>
@@ -336,11 +336,11 @@ $grossNames = ['tedis'=>'TEDIS', 'dpci'=>'DPCI', 'laborex'=>'LABOREX', 'copharme
         <div class="card h-100">
             <div class="card-header d-flex justify-content-between">
                 <span>🏪 Top Clients</span>
-                <a href="clients.php?all=1" class="text-decoration-none small">Tous →</a>
+                <a href="/inox-pharma-ventes/clients.php?all=1" class="text-decoration-none small">Tous →</a>
             </div>
             <div class="card-body p-0" style="max-height:350px;overflow-y:auto;">
                 <?php foreach($topClients as $i=>$c): ?>
-                <a href="client_detail.php?client=<?php echo $c['code_client']; ?>" class="top-link">
+                <a href="/inox-pharma-ventes/client_detail.php?client=<?php echo $c['code_client']; ?>" class="top-link">
                     <span class="rank <?php echo ['gold','silver','bronze'][$i]??''; ?>"><?php echo ['🥇','🥈','🥉'][$i]??($i+1); ?></span>
                     <span class="flex-grow-1 small"><?php echo htmlspecialchars($c['designation']); ?></span>
                     <span class="fw-bold small"><?php echo number_format($c['total']); ?></span>
@@ -353,7 +353,7 @@ $grossNames = ['tedis'=>'TEDIS', 'dpci'=>'DPCI', 'laborex'=>'LABOREX', 'copharme
         <div class="card h-100">
             <div class="card-header d-flex justify-content-between">
                 <span>🏢 Agences</span>
-                <a href="regions.php" class="text-decoration-none small">Carte →</a>
+                <a href="/inox-pharma-ventes/regions.php" class="text-decoration-none small">Carte →</a>
             </div>
             <div class="card-body">
                 <?php $maxAg = max(array_column($ventesParAgence,'total'))?:1; 
@@ -394,7 +394,7 @@ $grossNames = ['tedis'=>'TEDIS', 'dpci'=>'DPCI', 'laborex'=>'LABOREX', 'copharme
             <div class="card-header bg-success text-white" style="border-radius:12px 12px 0 0!important;"><h6 class="mb-0 small">📈 Plus forte croissance</h6></div>
             <div class="card-body p-0">
                 <?php foreach($produitsEnHausse as $ph): ?>
-                <a href="produit_detail.php?cip=<?php echo $ph['code_cip']; ?>" class="top-link">
+                <a href="/inox-pharma-ventes/produit_detail.php?cip=<?php echo $ph['code_cip']; ?>" class="top-link">
                     <span class="flex-grow-1 small"><?php echo htmlspecialchars($ph['libelle']); ?></span>
                     <span class="badge bg-success">+<?php echo $ph['evolution']; ?>%</span>
                 </a>
@@ -409,7 +409,7 @@ $grossNames = ['tedis'=>'TEDIS', 'dpci'=>'DPCI', 'laborex'=>'LABOREX', 'copharme
             <div class="card-header bg-danger text-white" style="border-radius:12px 12px 0 0!important;"><h6 class="mb-0 small">📉 Plus forte baisse</h6></div>
             <div class="card-body p-0">
                 <?php foreach($produitsEnBaisse as $pb): ?>
-                <a href="produit_detail.php?cip=<?php echo $pb['code_cip']; ?>" class="top-link">
+                <a href="/inox-pharma-ventes/produit_detail.php?cip=<?php echo $pb['code_cip']; ?>" class="top-link">
                     <span class="flex-grow-1 small"><?php echo htmlspecialchars($pb['libelle']); ?></span>
                     <span class="badge bg-danger"><?php echo $pb['evolution']; ?>%</span>
                 </a>

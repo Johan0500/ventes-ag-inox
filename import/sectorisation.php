@@ -91,7 +91,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['sector_file'])) {
             $type = 'success';
             
         } catch (Exception $e) {
-            $pdo->rollBack();
+            if ($pdo->inTransaction()) {
+
+                $pdo->rollBack();
+
+            }
             $message = "❌ Erreur : " . $e->getMessage();
             $type = 'danger';
         }

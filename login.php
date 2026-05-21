@@ -7,7 +7,7 @@ require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/auth.php';
 
 if (isLoggedIn()) {
-    $redirect = $_SESSION['redirect_url'] ?? 'index.php';
+    $redirect = $_SESSION['redirect_url'] ?? '/inox-pharma-ventes/index.php';
     unset($_SESSION['redirect_url']);
     header("Location: $redirect");
     exit;
@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Veuillez remplir tous les champs.';
         } else {
             if (login($username, $password)) {
-                $redirect = $_SESSION['redirect_url'] ?? 'index.php';
+                $redirect = $_SESSION['redirect_url'] ?? '/inox-pharma-ventes/index.php';
                 unset($_SESSION['redirect_url']);
                 header("Location: $redirect");
                 exit;
